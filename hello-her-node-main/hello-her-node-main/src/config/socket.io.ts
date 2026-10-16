@@ -216,6 +216,52 @@ export const configureSocket = async (
       } catch (err) {
         console.error("Error updating online state on addUser:", err);
       }
+
+      // 📬 Update undelivered "sent" messages to "delivered" (Double Ticks)
+      try {
+        if (mongoose.Types.ObjectId.isValid(userId)) {
+          const Message = (await import("../modals/message.model")).default;
+          const undeliveredMessages = await Message.find({
+            receiverId: new mongoose.Types.ObjectId(userId),
+            status: "sent",
+          }).select("_id senderId").lean();
+
+          if (undeliveredMessages.length > 0) {
+            await Message.updateMany(
+              { receiverId: new mongoose.Types.ObjectId(userId), status: "sent" },
+              { $set: { status: "delivered" } }
+            );
+
+            console.log(`[SOCKET] Marked ${undeliveredMessages.length} pending messages as delivered for ${userId}`);
+
+            const senderMap: { [key: string]: string[] } = {};
+            undeliveredMessages.forEach((msg: any) => {
+              const sId = msg.senderId.toString();
+              if (!senderMap[sId]) senderMap[sId] = [];
+              senderMap[sId].push(msg._id.toString());
+            });
+
+            for (const [sId, ids] of Object.entries(senderMap)) {
+              const sUser = getUser(sId);
+              if (sUser) {
+                const deliveryPayload = {
+                  senderId: sId,
+                  receiverId: userId,
+                  messageIds: ids,
+                  messageId: ids[0],
+                  status: "delivered",
+                };
+                io.to(sUser.socketId).emit("messagesDelivered", deliveryPayload);
+                io.to(sUser.socketId).emit("messages_delivered", deliveryPayload);
+                io.to(sUser.socketId).emit("message_delivered", deliveryPayload);
+                io.to(sUser.socketId).emit("messageDelivered", deliveryPayload);
+              }
+            }
+          }
+        }
+      } catch (delivErr) {
+        console.error("Error updating undelivered messages on addUser:", delivErr);
+      }
     });
 
     socket.on(
@@ -474,10 +520,16 @@ export const configureSocket = async (
               { senderId: rId, receiverId: sId, isRead: false },
             ],
           },
-          { $set: { isRead: true } }
+          { $set: { status: "read", isRead: true } }
         );
 
-        const payload = { senderId: sId, receiverId: rId, modifiedCount: result.modifiedCount };
+        const payload = {
+          senderId: sId,
+          receiverId: rId,
+          modifiedCount: result.modifiedCount,
+          status: "read",
+          isRead: true,
+        };
 
         const sUser = getUser(sId);
         if (sUser) {
@@ -494,6 +546,62 @@ export const configureSocket = async (
       } catch (err) {
         console.error("Error handling mark_read socket event:", err);
       }
+    });
+
+    socket.on("mark_delivered", async (data: any) => {
+      try {
+        const { messageId, messageIds, senderId, receiverId } = data || {};
+        const socketUser = users.find((u) => u.socketId === socket.id);
+        const readerId = (receiverId || socketUser?.userId)?.toString();
+
+        const Message = (await import("../modals/message.model")).default;
+        const query: any = { status: "sent" };
+        if (messageId && mongoose.Types.ObjectId.isValid(messageId)) {
+          query._id = new mongoose.Types.ObjectId(messageId);
+        } else if (messageIds && Array.isArray(messageIds) && messageIds.length > 0) {
+          query._id = { $in: messageIds.filter((id: string) => mongoose.Types.ObjectId.isValid(id)).map((id: string) => new mongoose.Types.ObjectId(id)) };
+        } else if (readerId && senderId && mongoose.Types.ObjectId.isValid(readerId) && mongoose.Types.ObjectId.isValid(senderId)) {
+          query.senderId = new mongoose.Types.ObjectId(senderId);
+          query.receiverId = new mongoose.Types.ObjectId(readerId);
+        } else {
+          return;
+        }
+
+        const undeliveredDocs = await Message.find(query).select("_id senderId receiverId").lean();
+        if (undeliveredDocs.length === 0) return;
+
+        await Message.updateMany(query, { $set: { status: "delivered" } });
+
+        const senderMap: { [key: string]: string[] } = {};
+        undeliveredDocs.forEach((doc: any) => {
+          const sId = doc.senderId.toString();
+          if (!senderMap[sId]) senderMap[sId] = [];
+          senderMap[sId].push(doc._id.toString());
+        });
+
+        for (const [sId, ids] of Object.entries(senderMap)) {
+          const sUser = getUser(sId);
+          if (sUser) {
+            const deliveryPayload = {
+              senderId: sId,
+              receiverId: readerId || undeliveredDocs[0].receiverId?.toString(),
+              messageIds: ids,
+              messageId: ids[0],
+              status: "delivered",
+            };
+            io.to(sUser.socketId).emit("messagesDelivered", deliveryPayload);
+            io.to(sUser.socketId).emit("messages_delivered", deliveryPayload);
+            io.to(sUser.socketId).emit("message_delivered", deliveryPayload);
+            io.to(sUser.socketId).emit("messageDelivered", deliveryPayload);
+          }
+        }
+      } catch (err) {
+        console.error("Error handling mark_delivered socket event:", err);
+      }
+    });
+
+    socket.on("message_delivered", async (data: any) => {
+      socket.emit("mark_delivered", data);
     });
 
     socket.on("disconnect", (reason) => {

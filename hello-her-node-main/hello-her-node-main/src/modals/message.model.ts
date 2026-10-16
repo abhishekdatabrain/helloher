@@ -13,6 +13,7 @@ export interface IMessageMedia {
 export interface IMessage extends Document {
   text?: string;
   media?: IMessageMedia[];
+  status: "sent" | "delivered" | "read";
   isRead: boolean;
   senderId: Types.ObjectId;
   receiverId: Types.ObjectId;
@@ -49,6 +50,12 @@ const messageSchema = new Schema<IMessage>(
     media: {
       type: [messageMediaSchema],
       default: [],
+    },
+    status: {
+      type: String,
+      enum: ["sent", "delivered", "read"],
+      default: "sent",
+      required: true,
     },
     isRead: { type: Boolean, default: false },
   },

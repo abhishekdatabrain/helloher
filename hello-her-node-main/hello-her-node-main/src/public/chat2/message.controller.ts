@@ -187,7 +187,7 @@ export class MessageController {
 
       console.log("[createMessage] auth user:", req.user);
 
-      const { senderId, role, receiverId, text, media } = req.body;
+      const { senderId, role, receiverId, text, media, status } = req.body;
       const normalizedRole = typeof role === "string" ? role.trim().toLowerCase() : "";
       console.log("[createMessage] parsed inputs:", {
         senderId,
@@ -316,22 +316,29 @@ export class MessageController {
       try {
         console.log("💾 Creating message...");
 
+        const io = req.app.get("socketio");
+        const getSocketUser = req.app.get("getSocketUser");
+        const receiver = (io && getSocketUser) ? getSocketUser(receiverId.toString()) : null;
+        const initialStatus: "sent" | "delivered" = receiver ? "delivered" : "sent";
+
         message = await Message.create({
           senderId,
           receiverId,
           senderRole: normalizedRole,
           text: text ? encrypt(text) : undefined,
           media: media || [],
+          status: initialStatus,
           isRead: false,
         });
 
-        console.log("✅ Message created:", message._id);
+        console.log("✅ Message created:", message._id, "with status:", message.status);
 
-        console.log("ðŸ“� Saved message details:", {
+        console.log("ðŸ“ Saved message details:", {
           messageId: message._id?.toString(),
           senderId: message.senderId?.toString?.() || senderId?.toString?.(),
           receiverId: message.receiverId?.toString?.() || receiverId?.toString?.(),
           senderRole: message.senderRole,
+          status: message.status,
           createdAt: message.createdAt,
         });
 
@@ -340,6 +347,7 @@ export class MessageController {
           senderId: message.senderId?.toString?.() || senderId?.toString?.(),
           receiverId: message.receiverId?.toString?.() || receiverId?.toString?.(),
           senderRole: message.senderRole,
+          status: message.status,
           createdAt: message.createdAt,
         });
 
@@ -384,6 +392,7 @@ export class MessageController {
         text: decryptedText,
         media: message.media,
         createdAt: message.createdAt,
+        status: message.status,
         isRead: message.isRead,
       };
 
@@ -407,6 +416,18 @@ export class MessageController {
 
         if (sender) {
           io.to(sender.socketId).emit("getMessage", messagePayload);
+          if (message.status === "delivered") {
+            const deliveredPayload = {
+              messageId: message._id.toString(),
+              messageIds: [message._id.toString()],
+              senderId: senderId.toString(),
+              receiverId: receiverId.toString(),
+              status: "delivered",
+            };
+            io.to(sender.socketId).emit("messageDelivered", deliveredPayload);
+            io.to(sender.socketId).emit("messagesDelivered", deliveredPayload);
+            io.to(sender.socketId).emit("message_delivered", deliveredPayload);
+          }
           console.log("📤 Sent to sender");
         }
       }
@@ -453,6 +474,7 @@ export class MessageController {
         data: {
           ...message.toObject(),
           text: decryptedText,
+          status: message.status,
         },
       });
 
@@ -566,6 +588,7 @@ export class MessageController {
           $project: {
             _id: 1,
             text: 1,
+            status: 1,
             isRead: 1,
             createdAt: 1,
             media: 1,
@@ -669,7 +692,7 @@ export class MessageController {
             { senderId: receiverIdStr, receiverId: senderIdStr, isRead: false },
           ],
         },
-        { $set: { isRead: true } }
+        { $set: { status: "read", isRead: true } }
       );
 
       console.log("✅ [MESSAGE] Messages marked as read in DB:", {
@@ -687,6 +710,8 @@ export class MessageController {
           senderId: senderIdStr,
           receiverId: receiverIdStr,
           modifiedCount: result.modifiedCount,
+          status: "read",
+          isRead: true,
         };
 
         const senderSocket = getSocketUser(senderIdStr);
@@ -765,6 +790,8 @@ export class MessageController {
             messageId: "$lastMessage._id",
             text: "$lastMessage.text",
             createdAt: "$lastMessage.createdAt",
+            status: "$lastMessage.status",
+            isRead: "$lastMessage.isRead",
             sender: {
               _id: "$lastMessage.senderId",
               role: "$lastMessage.senderRole",
@@ -848,6 +875,7 @@ export class MessageController {
         {
           $project: {
             text: 1,
+            status: 1,
             isRead: 1,
             createdAt: 1,
             media: 1,
@@ -987,6 +1015,7 @@ export class MessageController {
             messageId: "$lastMessage._id",
             text: "$lastMessage.text",
             createdAt: "$lastMessage.createdAt",
+            status: "$lastMessage.status",
             isRead: "$lastMessage.isRead",
             unreadCount: 1,
             sender: {
@@ -1137,6 +1166,7 @@ export class MessageController {
             messageId: "$lastMessage._id",
             text: "$lastMessage.text",
             createdAt: "$lastMessage.createdAt",
+            status: "$lastMessage.status",
             isRead: "$lastMessage.isRead",
             unreadCount: 1,
             sender: {
