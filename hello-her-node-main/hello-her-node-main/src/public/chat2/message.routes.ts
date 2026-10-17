@@ -20,6 +20,7 @@ router.get("/provider/conversations", authenticateToken, asyncHandler(MessageCon
 router.get("/chat/:userId/:providerId", authenticateToken, asyncHandler(MessageController.getChatBetweenUsers));
 router.get("/:id", authenticateToken, asyncHandler(MessageController.getMessageById));
 router.put("/mark-read", authenticateToken, asyncHandler(MessageController.markMessagesAsRead));
+router.put("/mark-delivered", authenticateToken, asyncHandler(MessageController.markMessagesAsDelivered));
 router.get("/", authenticateToken, asyncHandler(MessageController.getUniqueConversations));
   
 export default router;

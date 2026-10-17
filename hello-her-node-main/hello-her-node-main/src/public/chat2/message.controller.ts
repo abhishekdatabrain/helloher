@@ -526,6 +526,53 @@ export class MessageController {
         return res.status(400).json({ message: "Invalid user or provider ID" });
       }
 
+      // Auto-deliver pending "sent" messages destined for the requesting user
+      const currentAuthUser = (req as any).user?.id || (req as any).user?._id;
+      if (currentAuthUser) {
+        const readerIdStr = currentAuthUser.toString();
+        let otherUserIdStr: string | null = null;
+        if (readerIdStr === userId) {
+          otherUserIdStr = providerId;
+        } else if (readerIdStr === providerId) {
+          otherUserIdStr = userId;
+        }
+
+        if (otherUserIdStr && mongoose.Types.ObjectId.isValid(otherUserIdStr) && mongoose.Types.ObjectId.isValid(readerIdStr)) {
+          const undeliveredDocs = await Message.find({
+            senderId: new mongoose.Types.ObjectId(otherUserIdStr),
+            receiverId: new mongoose.Types.ObjectId(readerIdStr),
+            status: "sent",
+          }).select("_id").lean();
+
+          if (undeliveredDocs.length > 0) {
+            const undeliveredIds = undeliveredDocs.map((d: any) => d._id);
+            await Message.updateMany(
+              { _id: { $in: undeliveredIds } },
+              { $set: { status: "delivered" } }
+            );
+
+            const io = req.app.get("socketio");
+            const getSocketUser = req.app.get("getSocketUser");
+            if (io && getSocketUser) {
+              const senderSocket = getSocketUser(otherUserIdStr);
+              if (senderSocket) {
+                const deliveryPayload = {
+                  senderId: otherUserIdStr,
+                  receiverId: readerIdStr,
+                  messageIds: undeliveredIds.map((id: any) => id.toString()),
+                  messageId: undeliveredIds[0].toString(),
+                  status: "delivered",
+                };
+                io.to(senderSocket.socketId).emit("messagesDelivered", deliveryPayload);
+                io.to(senderSocket.socketId).emit("messages_delivered", deliveryPayload);
+                io.to(senderSocket.socketId).emit("messageDelivered", deliveryPayload);
+                io.to(senderSocket.socketId).emit("message_delivered", deliveryPayload);
+              }
+            }
+          }
+        }
+      }
+
       const messages: any[] = await Message.aggregate([
         {
           $match: {
@@ -675,72 +722,216 @@ export class MessageController {
 
   static async markMessagesAsRead(req: Request | any, res: Response) {
     try {
+      const { messageId, messageIds } = req.body || {};
       const rawSenderId = req.body.senderId || req.body.userId;
       const rawReceiverId = req.body.receiverId || req.body.providerId;
+      const currentUserId = (req as any).user?.id || (req as any).user?._id;
 
-      if (!rawSenderId || !rawReceiverId) {
-        return res.status(400).json({ message: "senderId and receiverId (or userId and providerId) are required" });
+      let query: any = {};
+      const unreadCondition = { $or: [{ isRead: false }, { status: { $ne: "read" } }] };
+
+      if (messageIds && Array.isArray(messageIds) && messageIds.length > 0) {
+        const validIds = messageIds
+          .filter((id: string) => mongoose.Types.ObjectId.isValid(id))
+          .map((id: string) => new mongoose.Types.ObjectId(id));
+        query = { _id: { $in: validIds }, ...unreadCondition };
+      } else if (messageId && mongoose.Types.ObjectId.isValid(messageId)) {
+        query = { _id: new mongoose.Types.ObjectId(messageId), ...unreadCondition };
+      } else if (rawSenderId && rawReceiverId && mongoose.Types.ObjectId.isValid(rawSenderId) && mongoose.Types.ObjectId.isValid(rawReceiverId)) {
+        const sObjId = new mongoose.Types.ObjectId(rawSenderId.toString());
+        const rObjId = new mongoose.Types.ObjectId(rawReceiverId.toString());
+
+        if (currentUserId && (currentUserId.toString() === rawSenderId.toString() || currentUserId.toString() === rawReceiverId.toString())) {
+          const readerObjId = new mongoose.Types.ObjectId(currentUserId.toString());
+          const otherObjId = readerObjId.equals(sObjId) ? rObjId : sObjId;
+          query = {
+            senderId: otherObjId,
+            receiverId: readerObjId,
+            ...unreadCondition,
+          };
+        } else {
+          query = {
+            $and: [
+              {
+                $or: [
+                  { senderId: sObjId, receiverId: rObjId },
+                  { senderId: rObjId, receiverId: sObjId },
+                ],
+              },
+              unreadCondition,
+            ],
+          };
+        }
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide messageId, messageIds, or valid senderId and receiverId (or userId and providerId)",
+        });
       }
 
-      const senderIdStr = rawSenderId.toString();
-      const receiverIdStr = rawReceiverId.toString();
+      const unreadDocs = await Message.find(query).select("_id senderId receiverId").lean();
 
-      const result = await Message.updateMany(
-        {
-          $or: [
-            { senderId: senderIdStr, receiverId: receiverIdStr, isRead: false },
-            { senderId: receiverIdStr, receiverId: senderIdStr, isRead: false },
-          ],
-        },
-        { $set: { status: "read", isRead: true } }
-      );
+      if (unreadDocs.length > 0) {
+        await Message.updateMany(query, { $set: { status: "read", isRead: true } });
+      }
+
+      const updatedIds = unreadDocs.map((doc: any) => doc._id.toString());
+      const senderIdStr = rawSenderId?.toString() || (unreadDocs[0]?.senderId?.toString() ?? "");
+      const receiverIdStr = rawReceiverId?.toString() || (unreadDocs[0]?.receiverId?.toString() ?? "");
 
       console.log("✅ [MESSAGE] Messages marked as read in DB:", {
-        modifiedCount: result.modifiedCount,
+        modifiedCount: unreadDocs.length,
         senderId: senderIdStr,
         receiverId: receiverIdStr,
+        updatedIds,
       });
 
       // 🔔 Emit socket AFTER DB update
       const io = req.app.get("socketio");
       const getSocketUser = req.app.get("getSocketUser");
 
-      if (io && getSocketUser) {
+      if (io && getSocketUser && unreadDocs.length > 0) {
         const payload = {
+          messageIds: updatedIds,
+          messageId: updatedIds[0] || null,
           senderId: senderIdStr,
           receiverId: receiverIdStr,
-          modifiedCount: result.modifiedCount,
+          userId: senderIdStr,
+          providerId: receiverIdStr,
+          modifiedCount: unreadDocs.length,
           status: "read",
           isRead: true,
         };
 
-        const senderSocket = getSocketUser(senderIdStr);
-        if (senderSocket) {
-          io.to(senderSocket.socketId).emit("messagesRead", payload);
-          io.to(senderSocket.socketId).emit("messages_read", payload);
-          io.to(senderSocket.socketId).emit("message_read", payload);
-          console.log("📤 [MESSAGE] Emitted messagesRead to sender:", {
-            senderId: senderIdStr,
-            senderSocketId: senderSocket.socketId,
-            receiverId: receiverIdStr,
-            modifiedCount: result.modifiedCount,
-          });
-        }
+        const emitToUser = (targetId: string) => {
+          if (!targetId) return;
+          const targetSocket = getSocketUser(targetId);
+          if (targetSocket) {
+            io.to(targetSocket.socketId).emit("messagesRead", payload);
+            io.to(targetSocket.socketId).emit("messages_read", payload);
+            io.to(targetSocket.socketId).emit("messageRead", payload);
+            io.to(targetSocket.socketId).emit("message_read", payload);
+          }
+        };
 
-        const receiverSocket = getSocketUser(receiverIdStr);
-        if (receiverSocket) {
-          io.to(receiverSocket.socketId).emit("messagesRead", payload);
-          io.to(receiverSocket.socketId).emit("messages_read", payload);
-          io.to(receiverSocket.socketId).emit("message_read", payload);
+        emitToUser(senderIdStr);
+        emitToUser(receiverIdStr);
+
+        const distinctSenders = new Set<string>();
+        unreadDocs.forEach((d: any) => {
+          if (d.senderId) distinctSenders.add(d.senderId.toString());
+        });
+        distinctSenders.forEach((sId) => {
+          if (sId !== senderIdStr && sId !== receiverIdStr) {
+            emitToUser(sId);
+          }
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: `${unreadDocs.length} messages marked as read.`,
+        data: {
+          modifiedCount: unreadDocs.length,
+          messageIds: updatedIds,
+          status: "read",
+          isRead: true,
+        },
+      });
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  static async markMessagesAsDelivered(req: Request | any, res: Response) {
+    try {
+      const { messageId, messageIds } = req.body || {};
+      const rawSenderId = req.body.senderId || req.body.userId;
+      const rawReceiverId = req.body.receiverId || req.body.providerId;
+      const currentUserId = (req as any).user?.id || (req as any).user?._id;
+
+      let query: any = {};
+
+      if (messageIds && Array.isArray(messageIds) && messageIds.length > 0) {
+        const validIds = messageIds
+          .filter((id: string) => mongoose.Types.ObjectId.isValid(id))
+          .map((id: string) => new mongoose.Types.ObjectId(id));
+        query = { _id: { $in: validIds }, status: "sent" };
+      } else if (messageId && mongoose.Types.ObjectId.isValid(messageId)) {
+        query = { _id: new mongoose.Types.ObjectId(messageId), status: "sent" };
+      } else if (rawSenderId && rawReceiverId && mongoose.Types.ObjectId.isValid(rawSenderId) && mongoose.Types.ObjectId.isValid(rawReceiverId)) {
+        const sObjId = new mongoose.Types.ObjectId(rawSenderId.toString());
+        const rObjId = new mongoose.Types.ObjectId(rawReceiverId.toString());
+
+        if (currentUserId && (currentUserId.toString() === rawSenderId.toString() || currentUserId.toString() === rawReceiverId.toString())) {
+          const readerObjId = new mongoose.Types.ObjectId(currentUserId.toString());
+          const otherObjId = readerObjId.equals(sObjId) ? rObjId : sObjId;
+          query = {
+            senderId: otherObjId,
+            receiverId: readerObjId,
+            status: "sent",
+          };
+        } else {
+          query = {
+            senderId: sObjId,
+            receiverId: rObjId,
+            status: "sent",
+          };
+        }
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide messageId, messageIds, or valid senderId and receiverId (or userId and providerId)",
+        });
+      }
+
+      const undeliveredDocs = await Message.find(query).select("_id senderId receiverId").lean();
+
+      if (undeliveredDocs.length > 0) {
+        await Message.updateMany(query, { $set: { status: "delivered" } });
+
+        const io = req.app.get("socketio");
+        const getSocketUser = req.app.get("getSocketUser");
+
+        if (io && getSocketUser) {
+          const senderMap: { [key: string]: string[] } = {};
+          undeliveredDocs.forEach((doc: any) => {
+            const sId = doc.senderId.toString();
+            if (!senderMap[sId]) senderMap[sId] = [];
+            senderMap[sId].push(doc._id.toString());
+          });
+
+          for (const [sId, ids] of Object.entries(senderMap)) {
+            const sUser = getSocketUser(sId);
+            if (sUser) {
+              const deliveryPayload = {
+                senderId: sId,
+                receiverId: rawReceiverId?.toString() || undeliveredDocs[0].receiverId?.toString(),
+                messageIds: ids,
+                messageId: ids[0],
+                status: "delivered",
+              };
+              io.to(sUser.socketId).emit("messagesDelivered", deliveryPayload);
+              io.to(sUser.socketId).emit("messages_delivered", deliveryPayload);
+              io.to(sUser.socketId).emit("messageDelivered", deliveryPayload);
+              io.to(sUser.socketId).emit("message_delivered", deliveryPayload);
+            }
+          }
         }
       }
 
       return res.status(200).json({
         success: true,
-        message: `${result.modifiedCount} messages marked as read.`,
+        message: `${undeliveredDocs.length} messages marked as delivered.`,
+        data: {
+          modifiedCount: undeliveredDocs.length,
+          messageIds: undeliveredDocs.map((d: any) => d._id.toString()),
+          status: "delivered",
+        },
       });
     } catch (error) {
-      console.error("Error marking messages as read:", error);
+      console.error("Error marking messages as delivered:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
   }

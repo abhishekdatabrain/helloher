@@ -506,62 +506,110 @@ export const configureSocket = async (
       }
     });
 
-    socket.on("mark_read", async ({ senderId, receiverId, userId, providerId }: any) => {
+    socket.on("mark_read", async (data: any) => {
       try {
-        const sId = (senderId || userId)?.toString();
-        const rId = (receiverId || providerId)?.toString();
-        if (!sId || !rId) return;
-
+        const { senderId, receiverId, userId, providerId, messageId, messageIds } = data || {};
+        const rawSenderId = senderId || userId;
+        const rawReceiverId = receiverId || providerId;
         const Message = (await import("../modals/message.model")).default;
-        const result = await Message.updateMany(
-          {
-            $or: [
-              { senderId: sId, receiverId: rId, isRead: false },
-              { senderId: rId, receiverId: sId, isRead: false },
+
+        let query: any = {};
+        const unreadCondition = { $or: [{ isRead: false }, { status: { $ne: "read" } }] };
+
+        if (messageIds && Array.isArray(messageIds) && messageIds.length > 0) {
+          const validIds = messageIds
+            .filter((id: string) => mongoose.Types.ObjectId.isValid(id))
+            .map((id: string) => new mongoose.Types.ObjectId(id));
+          query = { _id: { $in: validIds }, ...unreadCondition };
+        } else if (messageId && mongoose.Types.ObjectId.isValid(messageId)) {
+          query = { _id: new mongoose.Types.ObjectId(messageId), ...unreadCondition };
+        } else if (rawSenderId && rawReceiverId && mongoose.Types.ObjectId.isValid(rawSenderId) && mongoose.Types.ObjectId.isValid(rawReceiverId)) {
+          const sObjId = new mongoose.Types.ObjectId(rawSenderId.toString());
+          const rObjId = new mongoose.Types.ObjectId(rawReceiverId.toString());
+          query = {
+            $and: [
+              {
+                $or: [
+                  { senderId: sObjId, receiverId: rObjId },
+                  { senderId: rObjId, receiverId: sObjId },
+                ],
+              },
+              unreadCondition,
             ],
-          },
-          { $set: { status: "read", isRead: true } }
-        );
+          };
+        } else {
+          return;
+        }
+
+        const unreadDocs = await Message.find(query).select("_id senderId receiverId").lean();
+        if (unreadDocs.length === 0) return;
+
+        await Message.updateMany(query, { $set: { status: "read", isRead: true } });
+
+        const updatedIds = unreadDocs.map((m: any) => m._id.toString());
+        const sId = rawSenderId?.toString() || unreadDocs[0].senderId.toString();
+        const rId = rawReceiverId?.toString() || unreadDocs[0].receiverId.toString();
 
         const payload = {
+          messageIds: updatedIds,
+          messageId: updatedIds[0] || null,
           senderId: sId,
           receiverId: rId,
-          modifiedCount: result.modifiedCount,
+          userId: sId,
+          providerId: rId,
+          modifiedCount: unreadDocs.length,
           status: "read",
           isRead: true,
         };
 
-        const sUser = getUser(sId);
-        if (sUser) {
-          io.to(sUser.socketId).emit("messagesRead", payload);
-          io.to(sUser.socketId).emit("messages_read", payload);
-          io.to(sUser.socketId).emit("message_read", payload);
-        }
-        const rUser = getUser(rId);
-        if (rUser) {
-          io.to(rUser.socketId).emit("messagesRead", payload);
-          io.to(rUser.socketId).emit("messages_read", payload);
-          io.to(rUser.socketId).emit("message_read", payload);
-        }
+        const emitToUser = (targetId: string) => {
+          if (!targetId) return;
+          const targetSocket = getUser(targetId);
+          if (targetSocket) {
+            io.to(targetSocket.socketId).emit("messagesRead", payload);
+            io.to(targetSocket.socketId).emit("messages_read", payload);
+            io.to(targetSocket.socketId).emit("messageRead", payload);
+            io.to(targetSocket.socketId).emit("message_read", payload);
+          }
+        };
+
+        emitToUser(sId);
+        emitToUser(rId);
+
+        const distinctSenders = new Set<string>();
+        unreadDocs.forEach((d: any) => {
+          if (d.senderId) distinctSenders.add(d.senderId.toString());
+        });
+        distinctSenders.forEach((senderStr) => {
+          if (senderStr !== sId && senderStr !== rId) {
+            emitToUser(senderStr);
+          }
+        });
       } catch (err) {
         console.error("Error handling mark_read socket event:", err);
       }
     });
 
-    socket.on("mark_delivered", async (data: any) => {
+    const handleMarkDelivered = async (data: any) => {
       try {
-        const { messageId, messageIds, senderId, receiverId } = data || {};
+        const { messageId, messageIds, senderId, receiverId, userId, providerId } = data || {};
         const socketUser = users.find((u) => u.socketId === socket.id);
-        const readerId = (receiverId || socketUser?.userId)?.toString();
+        const readerId = (receiverId || providerId || socketUser?.userId)?.toString();
+        const otherId = (senderId || userId)?.toString();
 
         const Message = (await import("../modals/message.model")).default;
-        const query: any = { status: "sent" };
+        let query: any = { status: "sent" };
+
         if (messageId && mongoose.Types.ObjectId.isValid(messageId)) {
           query._id = new mongoose.Types.ObjectId(messageId);
         } else if (messageIds && Array.isArray(messageIds) && messageIds.length > 0) {
-          query._id = { $in: messageIds.filter((id: string) => mongoose.Types.ObjectId.isValid(id)).map((id: string) => new mongoose.Types.ObjectId(id)) };
-        } else if (readerId && senderId && mongoose.Types.ObjectId.isValid(readerId) && mongoose.Types.ObjectId.isValid(senderId)) {
-          query.senderId = new mongoose.Types.ObjectId(senderId);
+          query._id = {
+            $in: messageIds
+              .filter((id: string) => mongoose.Types.ObjectId.isValid(id))
+              .map((id: string) => new mongoose.Types.ObjectId(id)),
+          };
+        } else if (readerId && otherId && mongoose.Types.ObjectId.isValid(readerId) && mongoose.Types.ObjectId.isValid(otherId)) {
+          query.senderId = new mongoose.Types.ObjectId(otherId);
           query.receiverId = new mongoose.Types.ObjectId(readerId);
         } else {
           return;
@@ -591,18 +639,17 @@ export const configureSocket = async (
             };
             io.to(sUser.socketId).emit("messagesDelivered", deliveryPayload);
             io.to(sUser.socketId).emit("messages_delivered", deliveryPayload);
-            io.to(sUser.socketId).emit("message_delivered", deliveryPayload);
             io.to(sUser.socketId).emit("messageDelivered", deliveryPayload);
+            io.to(sUser.socketId).emit("message_delivered", deliveryPayload);
           }
         }
       } catch (err) {
         console.error("Error handling mark_delivered socket event:", err);
       }
-    });
+    };
 
-    socket.on("message_delivered", async (data: any) => {
-      socket.emit("mark_delivered", data);
-    });
+    socket.on("mark_delivered", handleMarkDelivered);
+    socket.on("message_delivered", handleMarkDelivered);
 
     socket.on("disconnect", (reason) => {
       const disconnectedUser = users.find((u) => u.socketId === socket.id);
