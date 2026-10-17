@@ -13,6 +13,7 @@ router.post(
   s3UploaderMiddleware("chat-media"),
   asyncHandler(MessageController.createMessage)
 );
+// routes
 
 router.get("/all", authenticateToken, asyncHandler(MessageController.getAllMessages));
 router.get("/user/conversations", authenticateToken, asyncHandler(MessageController.getUserConversations));
