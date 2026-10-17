@@ -173,7 +173,7 @@ export class MessageController {
   //       data: responseMessage,
   //     });
 
-  //   } catch (error) {
+  ////   } catch (error) {
   //     console.error("Error creating message:", error);
   //     return res.status(500).json({ message: "Internal server error" });
   //   }
