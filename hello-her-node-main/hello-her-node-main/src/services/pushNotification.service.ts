@@ -13,23 +13,20 @@ export const sendPushNotification = async ({
 }): Promise<string> => {
   const message: admin.messaging.Message = {
     token,
-    notification: {
-      title,
-      body,
-    },
     data,
     android: {
       priority: "high",
-      notification: {
-        channelId: "calls",
-        priority: "max",
-        defaultSound: true,
-        defaultVibrateTimings: true,
-      },
+      // notification: {
+      //   channelId: "calls",
+      //   priority: "max",
+      //   defaultSound: true,
+      //   defaultVibrateTimings: true,
+      // },
     },
     apns: {
       headers: {
-        "apns-priority": "10",
+        "apns-priority": "5",
+        "apns-push-type": "background",
       },
       payload: {
         aps: {
