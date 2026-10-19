@@ -160,53 +160,58 @@ export class ProviderController {
     io: any,
     getSocketUser: (userId: string) => { userId: string; socketId: string } | undefined
   ) {
+    const providerIdStr = provider._id.toString();
+    const providerObjId = new mongoose.Types.ObjectId(providerIdStr);
+
     const connectedUserIds = Array.isArray(provider.connectedUsers)
       ? provider.connectedUsers.map((id: any) => id.toString())
       : [];
 
+    // 1. All users from previous calls (both incoming and outgoing)
     const callOutboundUserIds = await CallSession.distinct("callee", {
-      caller: provider._id,
+      $or: [{ caller: providerObjId }, { caller: providerIdStr }],
+      calleeModel: "User",
     });
     const callInboundUserIds = await CallSession.distinct("caller", {
-      callee: provider._id,
-    });
-    const chatRequestUserIds = await ChatRequest.distinct("userId", {
-      providerId: provider._id,
+      $or: [{ callee: providerObjId }, { callee: providerIdStr }],
+      callerModel: "User",
     });
 
+    // 2. All users from chat requests
+    const chatRequestUserIds = await ChatRequest.distinct("userId", {
+      $or: [{ providerId: providerObjId }, { providerId: providerIdStr }],
+    });
+
+    // 3. All users from chat messages
     let msgSenderUserIds: any[] = [];
     let msgReceiverUserIds: any[] = [];
     try {
       const Message = (await import("../../modals/message.model")).default;
-      msgSenderUserIds = await Message.distinct("senderId", { receiverId: provider._id });
-      msgReceiverUserIds = await Message.distinct("receiverId", { senderId: provider._id });
+      msgSenderUserIds = await Message.distinct("senderId", {
+        $or: [{ receiverId: providerObjId }, { receiverId: providerIdStr }],
+      });
+      msgReceiverUserIds = await Message.distinct("receiverId", {
+        $or: [{ senderId: providerObjId }, { senderId: providerIdStr }],
+      });
     } catch (e) {
       console.error("Error querying Message in notifyProviderOnline:", e);
     }
 
-    let chatSenderUserIds: any[] = [];
-    let chatReceiverUserIds: any[] = [];
-    try {
-      chatSenderUserIds = await Chat.distinct("senderId", { receiverId: provider._id });
-      chatReceiverUserIds = await Chat.distinct("receiverId", { senderId: provider._id });
-    } catch (e) {
-      console.error("Error querying Chat in notifyProviderOnline:", e);
-    }
+    const recipientIds = new Set<string>();
+    connectedUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
+    callOutboundUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
+    callInboundUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
+    chatRequestUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
+    msgSenderUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
+    msgReceiverUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
 
-    const providerIdStr = provider._id.toString();
-    const recipientIds = new Set<string>([
-      ...connectedUserIds,
-      ...callOutboundUserIds.map((id: any) => id.toString()),
-      ...callInboundUserIds.map((id: any) => id.toString()),
-      ...chatRequestUserIds.map((id: any) => id.toString()),
-      ...msgSenderUserIds.map((id: any) => id.toString()),
-      ...msgReceiverUserIds.map((id: any) => id.toString()),
-      ...chatSenderUserIds.map((id: any) => id.toString()),
-      ...chatReceiverUserIds.map((id: any) => id.toString()),
-    ]);
+    // Don't send notification to provider themselves
     recipientIds.delete(providerIdStr);
 
-    if (recipientIds.size === 0) return;
+    if (recipientIds.size === 0) {
+      console.log("[PROVIDER] No past connected users found for provider:", providerIdStr);
+      return;
+    }
 
     const providerName = provider.alias || provider.name || "Listener";
     console.log("[PROVIDER] Provider marked online, notifying connected clients:", {
@@ -2000,7 +2005,7 @@ export class ProviderController {
             req.body[field] === true || req.body[field] === "true";
           console.log(`[DEBUG] updateProvider - boolean field ${field} set:`, updateData[field]);
           if (field === "isOnline") {
-            shouldNotifyProviderOnline = !previousIsOnline && updateData[field] === true;
+            shouldNotifyProviderOnline = updateData[field] === true;
           }
         }
       });

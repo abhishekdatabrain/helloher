@@ -24,20 +24,20 @@ import {
 
 export type MarkConnectedResult =
   | {
-      outcome: "connected" | "already_connected";
-      session: ICallSession;
-      transitioned: boolean;
-    }
+    outcome: "connected" | "already_connected";
+    session: ICallSession;
+    transitioned: boolean;
+  }
   | {
-      outcome: "not_connectable";
-      session: ICallSession;
-      transitioned: false;
-    }
+    outcome: "not_connectable";
+    session: ICallSession;
+    transitioned: false;
+  }
   | {
-      outcome: "not_found";
-      session: null;
-      transitioned: false;
-    };
+    outcome: "not_found";
+    session: null;
+    transitioned: false;
+  };
 
 export interface DueBillingFinalizationResult {
   processed: boolean;
@@ -96,11 +96,11 @@ function createBillingSnapshot(
     capturedAt: new Date(),
     commissionSlabs: Array.isArray(commissionDoc?.commissionSlabs)
       ? commissionDoc.commissionSlabs.map((slab: any) => ({
-          minSeconds: Number(slab.minSeconds),
-          maxSeconds: Number(slab.maxSeconds),
-          providerSharePaise: floorToTwoDigits(slab.providerSharePaise),
-          adminSharePaise: floorToTwoDigits(slab.adminSharePaise),
-        }))
+        minSeconds: Number(slab.minSeconds),
+        maxSeconds: Number(slab.maxSeconds),
+        providerSharePaise: floorToTwoDigits(slab.providerSharePaise),
+        adminSharePaise: floorToTwoDigits(slab.adminSharePaise),
+      }))
       : [],
     globalCommissionPercentage: Number(
       commissionDoc?.globalCommissionPercentage ?? 0,
@@ -284,7 +284,7 @@ export class CallService {
       createBillingSnapshot(
         await CommissionModel.findOne().exec(),
         sessionDoc.perMinutePricePaise ??
-          config.call.perMinutePricePaiseDefault,
+        config.call.perMinutePricePaiseDefault,
       );
     const perSecondRate =
       billingSnapshot.perMinutePricePaise / 60;
@@ -444,12 +444,12 @@ export class CallService {
             recordingState: "failed",
             recordingStateUpdatedAt: new Date(),
             ...(isTerminal &&
-            currentSession?.recordingSid &&
-            currentSession?.recordingResourceId
+              currentSession?.recordingSid &&
+              currentSession?.recordingResourceId
               ? {
-                  recordingCleanupPending: true,
-                  cleanupNextAttemptAt: new Date(),
-                }
+                recordingCleanupPending: true,
+                cleanupNextAttemptAt: new Date(),
+              }
               : {}),
           },
         },
@@ -921,14 +921,14 @@ export class CallService {
               ? buildDueCallFilter(options.dueAt)
               : options.legacyProcessingBefore
                 ? {
-                    status: "processing",
-                    updatedAt: { $lt: options.legacyProcessingBefore },
-                  }
+                  status: "processing",
+                  updatedAt: { $lt: options.legacyProcessingBefore },
+                }
                 : {
-                    status: {
-                      $in: ["initiated", "ringing", "connected"],
-                    },
-                  }),
+                  status: {
+                    $in: ["initiated", "ringing", "connected"],
+                  },
+                }),
           };
 
           const lockedSession = await CallSession.findOneAndUpdate(
@@ -1135,7 +1135,7 @@ export class CallService {
           );
           if (
             requestedUnbilledProviderShare +
-              requestedUnbilledAdminShare >
+            requestedUnbilledAdminShare >
             unbilledPaise
           ) {
             requestedUnbilledAdminShare = floorToTwoDigits(

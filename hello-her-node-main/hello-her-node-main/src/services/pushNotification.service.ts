@@ -11,25 +11,53 @@ export const sendPushNotification = async ({
   body: string;
   data?: Record<string, string>;
 }): Promise<string> => {
+  const isCall = data?.type === "call_received";
+
   const message: admin.messaging.Message = {
     token,
     data,
+    // Agar call nahi hai (jaise provider_online, messages) toh phone par OS notification banner dikhayenge
+    ...(!isCall && title && body
+      ? {
+          notification: {
+            title,
+            body,
+          },
+        }
+      : {}),
     android: {
       priority: "high",
-      // notification: {
-      //   channelId: "calls",
-      //   priority: "max",
-      //   defaultSound: true,
-      //   defaultVibrateTimings: true,
-      // },
+      ...(!isCall && title && body
+        ? {
+            notification: {
+              channelId: "default",
+              priority: "high",
+              defaultSound: true,
+              defaultVibrateTimings: true,
+            },
+          }
+        : {}),
     },
     apns: {
-      headers: {
-        "apns-priority": "5",
-        "apns-push-type": "background",
-      },
+      headers: isCall
+        ? {
+            "apns-priority": "5",
+            "apns-push-type": "background",
+          }
+        : {
+            "apns-priority": "10",
+            "apns-push-type": "alert",
+          },
       payload: {
         aps: {
+          ...(!isCall && title && body
+            ? {
+                alert: {
+                  title,
+                  body,
+                },
+              }
+            : {}),
           contentAvailable: true,
           sound: "default",
         },
