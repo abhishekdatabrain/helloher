@@ -1,4 +1,4 @@
-import admin from "../utils/firebase";
+import admin, { initFirebase } from "../utils/firebase";
 
 export const sendPushNotification = async ({
   token,
@@ -11,6 +11,10 @@ export const sendPushNotification = async ({
   body: string;
   data?: Record<string, string>;
 }): Promise<string> => {
+  if (!admin.apps.length) {
+    initFirebase();
+  }
+
   // Ensure all data values are strings for strict FCM compatibility
   const stringData: Record<string, string> = {};
   for (const [key, value] of Object.entries(data)) {
