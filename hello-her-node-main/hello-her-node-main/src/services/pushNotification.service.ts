@@ -11,62 +11,56 @@ export const sendPushNotification = async ({
   body: string;
   data?: Record<string, string>;
 }): Promise<string> => {
-  const isCall = data?.type === "call_received";
+  // Ensure all data values are strings for strict FCM compatibility
+  const stringData: Record<string, string> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (value !== undefined && value !== null) {
+      stringData[key] = typeof value === "string" ? value : String(value);
+    }
+  }
 
   const message: admin.messaging.Message = {
     token,
-    data,
-    // Agar call nahi hai (jaise provider_online, messages) toh phone par OS notification banner dikhayenge
-    ...(!isCall && title && body
-      ? {
-          notification: {
-            title,
-            body,
-          },
-        }
-      : {}),
+    // 1. Top-level notification (Exact same as Firebase Console)
+    ...(title ? {
+      notification: {
+        title,
+        body: body || "",
+      },
+    } : {}),
+    data: stringData,
+    // 2. Android settings
     android: {
       priority: "high",
-      ...(!isCall && title && body
-        ? {
-            notification: {
-              channelId: "calls",
-              priority: "max",
-              defaultSound: true,
-              defaultVibrateTimings: true,
-            },
-          }
-        : {}),
+      ...(title ? {
+        notification: {
+          defaultSound: true,
+          defaultVibrateTimings: true,
+        },
+      } : {}),
     },
+    // 3. iOS APNs settings
     apns: {
-      headers: isCall
-        ? {
-            "apns-priority": "5",
-            "apns-push-type": "background",
-          }
-        : {
-            "apns-priority": "10",
-            "apns-push-type": "alert",
-          },
+      headers: {
+        "apns-priority": "10",
+      },
       payload: {
         aps: {
-          ...(!isCall && title && body
-            ? {
-                alert: {
-                  title,
-                  body,
-                },
-              }
-            : {}),
-          contentAvailable: true,
+          ...(title ? {
+            alert: {
+              title,
+              body: body || "",
+            },
+          } : {}),
           sound: "default",
+          contentAvailable: true,
         },
       },
     },
   };
 
   const response = await admin.messaging().send(message);
-  console.log("✅ Push sent:", response);
+  console.log("✅ Push sent successfully:", response);
   return response;
 };
 
