@@ -42,7 +42,7 @@ const removeUser = (socketId: string) => {
 };
 
 const getUser = (userId: string) => {
-  return users.find((u) => u.userId === userId);
+  return users.find((u) => u.userId === String(userId));
 };
 
 const recipientTypeFromModel = (model: "User" | "ServiceProvider") =>
@@ -666,7 +666,7 @@ export const configureSocket = async (
           if (provider) {
             provider.isOnCall = false;
             provider.currentCallStartedAt = null;
-            // provider.isOnline = false;
+            provider.isOnline = false;
             provider.socketId = null;
             provider.lastActive = new Date();
             await provider.save();

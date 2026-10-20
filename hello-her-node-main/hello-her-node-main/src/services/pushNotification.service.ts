@@ -38,6 +38,7 @@ export const sendPushNotification = async ({
       priority: "high",
       ...(title ? {
         notification: {
+          channelId: "default",
           defaultSound: true,
           defaultVibrateTimings: true,
         },

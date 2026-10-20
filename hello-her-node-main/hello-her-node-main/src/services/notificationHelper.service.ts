@@ -205,7 +205,7 @@ export async function createAndEmitNotification(
 
     console.log("📥 Incoming options:", safeOptions);
     // ✅ STEP 1: Silent update check
-    const SILENT_FIELDS = ["fcmToken", "lastSeen", "socketId"];
+    const SILENT_FIELDS = ["fcmToken", "lastSeen", "socketId", "isOnline"];
     const updatedFields = options.metadata?.updatedFields || [];
 
     console.log("🔍 Updated fields:", updatedFields);

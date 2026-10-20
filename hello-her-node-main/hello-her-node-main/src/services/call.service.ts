@@ -1363,23 +1363,93 @@ export class CallService {
         );
       });
 
-      if (
-        options.dueAt &&
-        options.io &&
-        options.getSocketUser &&
-        outcome.session
-      ) {
-        const participantIds = new Set([
-          outcome.session.caller.toString(),
-          outcome.session.callee.toString(),
-        ]);
-        for (const participantId of participantIds) {
-          const socketUser = options.getSocketUser(participantId);
-          if (socketUser) {
-            options.io.to(socketUser.socketId).emit("call_ended", {
-              sessionId,
-              reason: outcome.reason,
+      if (outcome.session) {
+        const isInsufficientBalance =
+          outcome.reason === "INSUFFICIENT_BALANCE" ||
+          outcome.session.disconnectReason === "INSUFFICIENT_BALANCE" ||
+          outcome.session.status === "insufficient_balance";
+
+        const isUserCaller = outcome.session.callerModel === "User";
+        const billedUserId = (
+          isUserCaller ? outcome.session.caller : outcome.session.callee
+        )?.toString();
+        const providerId = (
+          isUserCaller ? outcome.session.callee : outcome.session.caller
+        )?.toString();
+
+        if (options.io && options.getSocketUser) {
+          const participantIds = new Set([
+            outcome.session.caller.toString(),
+            outcome.session.callee.toString(),
+          ]);
+
+          for (const participantId of participantIds) {
+            const socketUser = options.getSocketUser(participantId);
+            if (socketUser) {
+              if (options.dueAt) {
+                options.io.to(socketUser.socketId).emit("call_ended", {
+                  sessionId,
+                  reason: outcome.reason || outcome.session.disconnectReason,
+                  isLowBalance: isInsufficientBalance,
+                  message:
+                    isInsufficientBalance && participantId === billedUserId
+                      ? "Your balance is low, please recharge to continue call."
+                      : undefined,
+                });
+              }
+
+              // Real-time on-screen recharge prompt for user
+              if (isInsufficientBalance && participantId === billedUserId) {
+                options.io.to(socketUser.socketId).emit("low_balance_prompt", {
+                  sessionId,
+                  title: "Low Balance",
+                  message: "Your balance is low, please recharge to continue call.",
+                  reason: "INSUFFICIENT_BALANCE",
+                  showRechargePrompt: true,
+                });
+                options.io.to(socketUser.socketId).emit("recharge_prompt", {
+                  sessionId,
+                  title: "Low Balance",
+                  message: "Your balance is low, please recharge to continue call.",
+                  reason: "INSUFFICIENT_BALANCE",
+                  showRechargePrompt: true,
+                });
+              }
+            }
+          }
+        }
+
+        // Send push notification & DB notification to the user when call ends due to low balance
+        if (isInsufficientBalance && billedUserId) {
+          try {
+            const { createAndEmitNotification } = await import(
+              "./notificationHelper.service"
+            );
+            await createAndEmitNotification({
+              type: "low_balance_call",
+              title: "Low Balance",
+              message: "Your balance is low, please recharge to continue call.",
+              notificationKey: `low_balance_recharge:${sessionId}`,
+              recipientId: billedUserId,
+              recipientType: "user",
+              senderId: providerId,
+              senderType: "provider",
+              metadata: {
+                sessionId,
+                channel: outcome.session.channel,
+                reason: "INSUFFICIENT_BALANCE",
+                showRechargePrompt: true,
+                rechargePromptMessage:
+                  "Your balance is low, please recharge to continue call.",
+              },
+              io: options.io,
+              getSocketUser: options.getSocketUser,
             });
+          } catch (notifErr) {
+            console.error(
+              `[Billing] Failed to emit low balance recharge notification for ${sessionId}:`,
+              notifErr,
+            );
           }
         }
       }

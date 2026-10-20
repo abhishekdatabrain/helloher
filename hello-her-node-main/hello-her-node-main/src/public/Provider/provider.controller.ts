@@ -170,11 +170,11 @@ export class ProviderController {
     // 1. All users from previous calls (both incoming and outgoing)
     const callOutboundUserIds = await CallSession.distinct("callee", {
       $or: [{ caller: providerObjId }, { caller: providerIdStr }],
-      calleeModel: "User",
+      calleeModel: { $ne: "ServiceProvider" },
     });
     const callInboundUserIds = await CallSession.distinct("caller", {
       $or: [{ callee: providerObjId }, { callee: providerIdStr }],
-      callerModel: "User",
+      callerModel: { $ne: "ServiceProvider" },
     });
 
     // 2. All users from chat requests
@@ -197,6 +197,17 @@ export class ProviderController {
       console.error("Error querying Message in notifyProviderOnline:", e);
     }
 
+    // 4. All users from chat sessions
+    let chatSessionUserIds: any[] = [];
+    try {
+      const { ChatSession } = await import("../../modals/chatSession.model");
+      chatSessionUserIds = await ChatSession.distinct("userId", {
+        $or: [{ providerId: providerObjId }, { providerId: providerIdStr }],
+      });
+    } catch (e) {
+      console.error("Error querying ChatSession in notifyProviderOnline:", e);
+    }
+
     const recipientIds = new Set<string>();
     connectedUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
     callOutboundUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
@@ -204,28 +215,46 @@ export class ProviderController {
     chatRequestUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
     msgSenderUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
     msgReceiverUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
+    chatSessionUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
+
+    // Exclude users blocked by this provider
+    const blockedUserIds = Array.isArray(provider.blockedUsers)
+      ? provider.blockedUsers.map((id: any) => id?.toString()).filter(Boolean)
+      : [];
+    blockedUserIds.forEach((id: string) => recipientIds.delete(id));
 
     // Don't send notification to provider themselves
     recipientIds.delete(providerIdStr);
 
-    if (recipientIds.size === 0) {
+    const validRecipientIds = Array.from(recipientIds).filter(
+      (id) => id && mongoose.Types.ObjectId.isValid(id) && id !== providerIdStr
+    );
+
+    if (validRecipientIds.length === 0) {
       console.log("[PROVIDER] No past connected users found for provider:", providerIdStr);
       return;
     }
 
     const providerName = provider.alias || provider.name || "Listener";
+    const providerImage =
+      provider.activeImageUrl ||
+      provider.profilePicture ||
+      provider.avatar ||
+      "";
+
     console.log("[PROVIDER] Provider marked online, notifying connected clients:", {
       providerId: providerIdStr,
-      recipientCount: recipientIds.size,
+      recipientCount: validRecipientIds.length,
     });
 
     const notifyPayload = {
       providerId: providerIdStr,
       providerName,
+      providerImage,
       status: "online",
     };
 
-    recipientIds.forEach((recipientId) => {
+    validRecipientIds.forEach((recipientId) => {
       const clientSocket = getSocketUser ? getSocketUser(recipientId) : undefined;
       if (clientSocket && io) {
         io.to(clientSocket.socketId).emit("provider_online", notifyPayload);
@@ -233,8 +262,8 @@ export class ProviderController {
     });
 
     const { createAndEmitNotification } = await import("../../services/notificationHelper.service");
-    await Promise.all(
-      Array.from(recipientIds).map((recipientId) =>
+    await Promise.allSettled(
+      validRecipientIds.map((recipientId) =>
         createAndEmitNotification({
           type: "provider_online",
           title: `${providerName} is now online`,
@@ -2002,7 +2031,10 @@ export class ProviderController {
         if (req.body[field] !== undefined) {
           console.log(`[DEBUG] updateProvider - boolean field ${field} input:`, req.body[field]);
           updateData[field] =
-            req.body[field] === true || req.body[field] === "true";
+            req.body[field] === true ||
+            req.body[field] === "true" ||
+            req.body[field] === 1 ||
+            req.body[field] === "1";
           console.log(`[DEBUG] updateProvider - boolean field ${field} set:`, updateData[field]);
           if (field === "isOnline") {
             shouldNotifyProviderOnline = updateData[field] === true;
@@ -2277,28 +2309,7 @@ export class ProviderController {
         }
       }
 
-      // 🔔 Create notification for profile update
-      try {
-        const { createAndEmitNotification } = await import("../../services/notificationHelper.service");
-        const io = req.app.get("socketio");
-        const getSocketUser = req.app.get("getSocketUser");
-
-        await createAndEmitNotification({
-          type: "profile_updated",
-          title: "Profile Updated",
-          message: "Your profile has been updated successfully.",
-          recipientId: providerId,
-          recipientType: "provider",
-          metadata: {
-            updatedFields: Object.keys(updateData),
-          },
-          io,
-          getSocketUser,
-        });
-      } catch (notifError) {
-        console.error("Error creating profile update notification:", notifError);
-        // Don't fail the request if notification fails
-      }
+      // 🔔 Profile update notification disabled for listener
 
       return res.status(200).json(
         new ApiResponse(
