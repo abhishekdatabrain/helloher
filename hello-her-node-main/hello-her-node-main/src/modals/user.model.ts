@@ -57,6 +57,7 @@ export interface IUser extends Document {
   generateJWT(): string;
   comparePassword?(candidatePassword: string): Promise<boolean>;
   wallet?: mongoose.Types.ObjectId;
+  favorites?: mongoose.Types.ObjectId[];
 }
 
 // 📄 Schema
@@ -228,6 +229,12 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    favorites: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "ServiceProvider",
+      },
+    ],
   },
   {
     timestamps: true,

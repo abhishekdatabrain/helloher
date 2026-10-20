@@ -52,6 +52,34 @@ userRouter.get(
   authenticateToken,
   asyncHandler(UserController.getUserById),
 );
+
+// ⭐ Favorites
+userRouter.post(
+  "/favorite",
+  authenticateToken,
+  asyncHandler(UserController.addFavorite),
+);
+userRouter.delete(
+  "/favorite/:providerId",
+  authenticateToken,
+  asyncHandler(UserController.removeFavorite),
+);
+userRouter.post(
+  "/favorite/remove",
+  authenticateToken,
+  asyncHandler(UserController.removeFavorite),
+);
+userRouter.get(
+  "/favorites",
+  authenticateToken,
+  asyncHandler(UserController.getFavorites),
+);
+userRouter.get(
+  "/favorite/status/:providerId",
+  authenticateToken,
+  asyncHandler(UserController.checkFavoriteStatus),
+);
+
 userRouter.get(
   "/:id",
   authenticateToken,

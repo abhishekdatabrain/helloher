@@ -961,8 +961,163 @@ export class UserController {
   //         "Google login successful",
   //       ),
   //     );
-  //   } catch (err) {
-  //     next(err);
-  //   }
-  // }
+  // ⭐ Add Listener to Favorites
+  static async addFavorite(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.id;
+      const providerId = req.body?.providerId || req.params?.providerId;
+
+      if (!userId) {
+        throw new ApiError(401, "User not authenticated");
+      }
+      if (!providerId || !mongoose.Types.ObjectId.isValid(providerId)) {
+        throw new ApiError(400, "Valid providerId is required");
+      }
+
+      const ServiceProvider = (
+        await import("../../modals/serviceProvider.model")
+      ).default;
+      const provider = await ServiceProvider.findById(providerId);
+      if (!provider) {
+        throw new ApiError(404, "Listener not found");
+      }
+
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $addToSet: { favorites: new mongoose.Types.ObjectId(providerId) } },
+        { new: true }
+      ).select("favorites");
+
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          {
+            providerId,
+            isFavorite: true,
+            favoritesCount: updatedUser?.favorites?.length ?? 0,
+          },
+          "Listener added to favorites successfully"
+        )
+      );
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // ⭐ Remove Listener from Favorites
+  static async removeFavorite(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.id;
+      const providerId = req.params.providerId || req.body?.providerId;
+
+      if (!userId) {
+        throw new ApiError(401, "User not authenticated");
+      }
+      if (!providerId || !mongoose.Types.ObjectId.isValid(providerId)) {
+        throw new ApiError(400, "Valid providerId is required");
+      }
+
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $pull: { favorites: new mongoose.Types.ObjectId(providerId) } },
+        { new: true }
+      ).select("favorites");
+
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          {
+            providerId,
+            isFavorite: false,
+            favoritesCount: updatedUser?.favorites?.length ?? 0,
+          },
+          "Listener removed from favorites successfully"
+        )
+      );
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // ⭐ Check if Listener is Favorited by User
+  static async checkFavoriteStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.id;
+      const providerId = req.params.providerId || req.query.providerId;
+
+      if (!userId) {
+        throw new ApiError(401, "User not authenticated");
+      }
+      if (!providerId || !mongoose.Types.ObjectId.isValid(providerId as string)) {
+        throw new ApiError(400, "Valid providerId is required");
+      }
+
+      const user = await User.findById(userId).select("favorites").lean();
+      const isFavorite = ((user?.favorites as any[]) || []).some(
+        (id: any) => id?.toString() === providerId.toString()
+      );
+
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          {
+            providerId,
+            isFavorite,
+          },
+          "Favorite status retrieved"
+        )
+      );
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // ⭐ Get All Favorite Listeners of User
+  static async getFavorites(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.id;
+
+      if (!userId) {
+        throw new ApiError(401, "User not authenticated");
+      }
+
+      const user = await User.findById(userId)
+        .populate({
+          path: "favorites",
+          model: "ServiceProvider",
+          select:
+            "_id name alias email phoneNumber profilePicture avatar activeImageType bio languages perMinutePricePaise isOnline lastActive trustScore avgRating totalCalls",
+          populate: {
+            path: "languages",
+            select: "name code",
+          },
+        })
+        .lean();
+
+      const favorites = ((user?.favorites as any[]) || []).map((provider: any) => {
+        if (!provider || typeof provider !== "object") return provider;
+        const activeImageUrl =
+          provider.activeImageType === "avatar"
+            ? provider.avatar || provider.profilePicture || null
+            : provider.profilePicture || provider.avatar || null;
+        return {
+          ...provider,
+          activeImageUrl,
+        };
+      });
+
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          {
+            favorites,
+            total: favorites.length,
+          },
+          "Favorite listeners fetched successfully"
+        )
+      );
+    } catch (err) {
+      next(err);
+    }
+  }
 }

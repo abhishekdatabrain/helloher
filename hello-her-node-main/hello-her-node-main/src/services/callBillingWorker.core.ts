@@ -71,8 +71,8 @@ export const buildDueCallFilter = (dueAt: Date): Record<string, unknown> => ({
   status: "connected",
   billingProcessed: { $ne: true },
   $or: [
-    { heartbeatExpiresAt: { $lte: dueAt } },
-    { autoEndAt: { $lte: dueAt } },
+    { heartbeatExpiresAt: { $ne: null, $lte: dueAt } },
+    { autoEndAt: { $ne: null, $lte: dueAt } },
   ],
 });
 

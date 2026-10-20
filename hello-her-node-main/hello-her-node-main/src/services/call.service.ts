@@ -203,14 +203,10 @@ export class CallService {
         return { allowed: false, reason: "CALLEE_OFFLINE" };
     }
 
-    // 🔹 Ensure the user has sufficient balance
-    const billedUserId =
-      params.callerType === "User" ? params.callerId : params.calleeId;
-    const shouldCheckBalance =
-      params.callerType === "User" || params.calleeType === "User";
-    if (shouldCheckBalance) {
+    // 🔹 Ensure the caller has sufficient balance (only required when User is initiating the call)
+    if (params.callerType === "User") {
       const hasMinBalance = await this.ensureSufficientBalance(
-        billedUserId,
+        params.callerId,
         Math.max(perMinute, config.call.lowBalanceThresholdPaise),
       );
       if (!hasMinBalance) return { allowed: false, reason: "LOW_BALANCE" };
@@ -273,8 +269,9 @@ export class CallService {
       };
     }
 
+    const isUserCaller = sessionDoc.callerModel === "User";
     const billedUserId =
-      sessionDoc.callerModel === "User"
+      isUserCaller
         ? sessionDoc.caller
         : sessionDoc.callee;
     const wallet = await Wallet.findOne({ user: billedUserId }).exec();
@@ -288,8 +285,9 @@ export class CallService {
       );
     const perSecondRate =
       billingSnapshot.perMinutePricePaise / 60;
-    const maxAllowedSeconds =
-      perSecondRate > 0 ? Math.floor(balance / perSecondRate) : 0;
+    const maxAllowedSeconds = isUserCaller
+      ? (perSecondRate > 0 ? Math.floor(balance / perSecondRate) : 0)
+      : null;
     const now = new Date();
 
     // Compare-and-set is the state-machine gate. A delayed REST request or a
@@ -310,11 +308,14 @@ export class CallService {
           lastBilledAt: now,
           maxAllowedSeconds,
           heartbeatExpiresAt: addSeconds(now, 20),
-          lowBalanceWarnAt: addSeconds(
-            now,
-            Math.max(0, maxAllowedSeconds - 60),
-          ),
-          autoEndAt: addSeconds(now, maxAllowedSeconds),
+          lowBalanceWarnAt:
+            isUserCaller && typeof maxAllowedSeconds === "number"
+              ? addSeconds(now, Math.max(0, maxAllowedSeconds - 60))
+              : null,
+          autoEndAt:
+            isUserCaller && typeof maxAllowedSeconds === "number"
+              ? addSeconds(now, maxAllowedSeconds)
+              : null,
         },
       },
       { new: true },

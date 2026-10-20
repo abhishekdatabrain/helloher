@@ -208,6 +208,16 @@ export class ProviderController {
       console.error("Error querying ChatSession in notifyProviderOnline:", e);
     }
 
+    // 5. All users who favorited this provider
+    let favUserIds: any[] = [];
+    try {
+      favUserIds = await User.distinct("_id", {
+        favorites: { $in: [providerObjId, providerIdStr] },
+      });
+    } catch (e) {
+      console.error("Error querying favorites in notifyProviderOnline:", e);
+    }
+
     const recipientIds = new Set<string>();
     connectedUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
     callOutboundUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
@@ -216,6 +226,7 @@ export class ProviderController {
     msgSenderUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
     msgReceiverUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
     chatSessionUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
+    favUserIds.forEach((id: any) => id && recipientIds.add(id.toString()));
 
     // Exclude users blocked by this provider
     const blockedUserIds = Array.isArray(provider.blockedUsers)
