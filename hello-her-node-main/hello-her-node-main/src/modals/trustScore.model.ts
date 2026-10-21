@@ -4,6 +4,7 @@ export interface ITrustScore extends Document {
   userId: mongoose.Types.ObjectId;
   providerId: mongoose.Types.ObjectId;
   trustScore: number;
+  review?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,6 +28,12 @@ const trustScoreSchema = new Schema<ITrustScore>(
       required: true,
       min: 0,
       max: 100, // optional range (you can change this)
+    },
+    review: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
     },
   },
   { timestamps: true }

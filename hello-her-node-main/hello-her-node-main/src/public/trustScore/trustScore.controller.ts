@@ -10,7 +10,7 @@ const trustScoreService = new CommonService(TrustScore);
 export class TrustScoreController {
   static async createTrustScore(req: Request, res: Response, next: NextFunction) {
     try {
-      const { providerId, trustScore } = req.body;
+      const { providerId, trustScore, review } = req.body;
       const user = (req as any).user;
 
       if (!user?.id) throw new ApiError(401, "Unauthorized");
@@ -28,6 +28,7 @@ export class TrustScoreController {
         userId: new mongoose.Types.ObjectId(user.id), // ✅ FIXED
         providerId,
         trustScore,
+        review: review ? String(review).trim() : "",
       });
 
       return res
@@ -44,18 +45,26 @@ export class TrustScoreController {
   static async updateTrustScore(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const { trustScore } = req.body;
+      const { trustScore, review } = req.body;
       const user = (req as any).user;
 
       if (!mongoose.Types.ObjectId.isValid(id))
         throw new ApiError(400, "Invalid trustScore id");
 
-      if (trustScore < 0 || trustScore > 100)
-        throw new ApiError(400, "trustScore must be between 0 and 100");
+      const updateData: any = {};
+      if (trustScore !== undefined) {
+        if (trustScore < 0 || trustScore > 100)
+          throw new ApiError(400, "trustScore must be between 0 and 100");
+        updateData.trustScore = trustScore;
+      }
+
+      if (review !== undefined) {
+        updateData.review = String(review).trim();
+      }
 
       const updated = await TrustScore.findOneAndUpdate(
         { _id: id, userId: user.id }, // ✅ ownership check
-        { trustScore },
+        updateData,
         { new: true }
       );
 

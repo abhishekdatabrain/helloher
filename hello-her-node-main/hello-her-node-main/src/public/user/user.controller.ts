@@ -966,6 +966,7 @@ export class UserController {
     try {
       const userId = (req as any).user?.id;
       const providerId = req.body?.providerId || req.params?.providerId;
+      const isFavoriteReq = req.body?.isFavorite;
 
       if (!userId) {
         throw new ApiError(401, "User not authenticated");
@@ -980,6 +981,26 @@ export class UserController {
       const provider = await ServiceProvider.findById(providerId);
       if (!provider) {
         throw new ApiError(404, "Listener not found");
+      }
+
+      if (isFavoriteReq === false) {
+        const updatedUser = await User.findByIdAndUpdate(
+          userId,
+          { $pull: { favorites: new mongoose.Types.ObjectId(providerId) } },
+          { new: true }
+        ).select("favorites");
+
+        return res.status(200).json(
+          new ApiResponse(
+            200,
+            {
+              providerId,
+              isFavorite: false,
+              favoritesCount: updatedUser?.favorites?.length ?? 0,
+            },
+            "Listener removed from favorites successfully"
+          )
+        );
       }
 
       const updatedUser = await User.findByIdAndUpdate(
@@ -1103,6 +1124,7 @@ export class UserController {
         return {
           ...provider,
           activeImageUrl,
+          isFavorite: true,
         };
       });
 
