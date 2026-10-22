@@ -206,4 +206,141 @@ export class TrustScoreController {
       next(err);
     }
   }
+
+  // Helper to fetch reviews and trust scores for a provider
+  static async fetchProviderReviewsData(providerId: string, query: any) {
+    if (!providerId || !mongoose.Types.ObjectId.isValid(providerId)) {
+      throw new ApiError(400, "Valid providerId is required");
+    }
+
+    const providerObjectId = new mongoose.Types.ObjectId(providerId);
+    const page = Math.max(1, parseInt(query.page as string, 10) || 1);
+    const limit = Math.max(1, parseInt(query.limit as string, 10) || 10);
+    const skip = (page - 1) * limit;
+
+    const match: any = {
+      providerId: providerObjectId,
+    };
+
+    if (query.onlyReviews === "true" || query.hasReview === "true") {
+      match.review = { $exists: true, $ne: "" };
+    }
+
+    const [aggregateResult] = await TrustScore.aggregate([
+      { $match: match },
+      {
+        $facet: {
+          reviews: [
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+            {
+              $lookup: {
+                from: "users",
+                localField: "userId",
+                foreignField: "_id",
+                as: "caller",
+              },
+            },
+            {
+              $unwind: {
+                path: "$caller",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                callerName: {
+                  $ifNull: ["$caller.name", "Anonymous Caller"],
+                },
+                callerAvatar: {
+                  $ifNull: ["$caller.avatar", "$caller.profilePicture"],
+                },
+                review: { $ifNull: ["$review", ""] },
+                trustScore: 1,
+                rating: "$trustScore",
+                createdAt: 1,
+                updatedAt: 1,
+                userId: "$caller._id",
+              },
+            },
+          ],
+          summary: [
+            {
+              $group: {
+                _id: null,
+                totalReviews: { $sum: 1 },
+                avgTrustScore: { $avg: "$trustScore" },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    const reviews = aggregateResult?.reviews || [];
+    const summary = aggregateResult?.summary?.[0] || { totalReviews: 0, avgTrustScore: 0 };
+    const totalReviews = summary.totalReviews || 0;
+    const avgTrustScore = Number((summary.avgTrustScore || 0).toFixed(1));
+
+    return {
+      reviews,
+      result: reviews,
+      avgTrustScore,
+      averageRating: avgTrustScore,
+      totalReviews,
+      pagination: {
+        currentPage: page,
+        itemsPerPage: limit,
+        totalItems: totalReviews,
+        totalPages: Math.ceil(totalReviews / limit) || 1,
+      },
+    };
+  }
+
+  // ✅ Get provider reviews & trust scores (Used by User app and Provider app)
+  static async getProviderReviews(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { providerId } = req.params;
+      const data = await TrustScoreController.fetchProviderReviewsData(
+        providerId,
+        req.query
+      );
+
+      return res
+        .status(200)
+        .json(new ApiResponse(200, data, "Provider reviews fetched successfully"));
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // ✅ Get logged-in provider's own reviews (Provider app convenience)
+  static async getMyReviews(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const providerId = (req as any).user?.id || (req as any).user?._id;
+      if (!providerId) {
+        throw new ApiError(401, "Unauthorized: Provider token required");
+      }
+      const data = await TrustScoreController.fetchProviderReviewsData(
+        providerId,
+        req.query
+      );
+
+      return res
+        .status(200)
+        .json(new ApiResponse(200, data, "My reviews fetched successfully"));
+    } catch (err) {
+      next(err);
+    }
+  }
 }

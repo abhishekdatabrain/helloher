@@ -40,6 +40,23 @@ router.get(
   asyncHandler(TrustScoreController.getProviderAverage)
 );
 
+// ✅ Get provider reviews & trust scores (Used by User app and Provider app)
+router.get(
+  "/provider/:providerId/reviews",
+  asyncHandler(TrustScoreController.getProviderReviews)
+);
+router.get(
+  "/provider/:providerId",
+  asyncHandler(TrustScoreController.getProviderReviews)
+);
+
+// ✅ Get logged-in provider's own reviews (Provider app convenience)
+router.get(
+  "/my-reviews",
+  authenticateToken,
+  asyncHandler(TrustScoreController.getMyReviews)
+);
+
 // ✅ Get by ID
 router.get(
   "/:id",
