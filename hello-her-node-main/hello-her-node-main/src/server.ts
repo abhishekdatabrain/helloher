@@ -11,6 +11,7 @@ import { config as manualConfig } from "./config/config"
 import { startCallBillingWorker } from "./services/callBillingWorker"
 import { startAvailabilityPenaltyScheduler } from "./scheduler/availabilityPenaltyScheduler";
 import { startPaidProfileScheduler } from "./scheduler/paidProfileScheduler";
+import { startChatImageExpiryScheduler } from "./scheduler/chatImageExpiryScheduler";
 import "./utils/firebase";
 import mongoose from "mongoose";
 // import bcrypt from "bcrypt"
@@ -101,6 +102,8 @@ const startServer = async (): Promise<void> => {
           startAvailabilityPenaltyScheduler(io, getSocketUser);
           // Start paid profile expiration scheduler (runs daily at 00:00)
           startPaidProfileScheduler();
+          // Start chat image expiry scheduler (runs every 10 mins; deletes images 12h after seen)
+          startChatImageExpiryScheduler(io, getSocketUser);
         } catch (schedulerError: any) {
           logger.error(`Failed to initialize schedulers: ${schedulerError.message}`);
           // Don't exit - server can still function without scheduler

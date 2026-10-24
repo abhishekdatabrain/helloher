@@ -68,7 +68,6 @@ router.get(
 router.delete(
   "/:id",
   authenticateToken,
-  isAdmin,
   asyncHandler(TrustScoreController.deleteTrustScore)
 );
 

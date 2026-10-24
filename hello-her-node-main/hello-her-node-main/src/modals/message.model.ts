@@ -15,6 +15,7 @@ export interface IMessage extends Document {
   media?: IMessageMedia[];
   status: "sent" | "delivered" | "read";
   isRead: boolean;
+  readAt?: Date | null;
   senderId: Types.ObjectId;
   receiverId: Types.ObjectId;
   senderRole: "user" | "provider";
@@ -58,6 +59,7 @@ const messageSchema = new Schema<IMessage>(
       required: true,
     },
     isRead: { type: Boolean, default: false },
+    readAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

@@ -158,11 +158,34 @@ export class TrustScoreController {
     next: NextFunction
   ) {
     try {
-      const result = await trustScoreService.deleteById(req.params.id);
+      const { id } = req.params;
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid trustScore ID");
+      }
+
+      const user = (req as any).user;
+      const userId = user?.id || user?._id;
+      const role = user?.role;
+
+      const existing = await TrustScore.findById(id);
+      if (!existing) {
+        throw new ApiError(404, "Review / TrustScore not found");
+      }
+
+      // If not admin, verify ownership (provider or review author)
+      if (role !== "admin") {
+        const isProvider = existing.providerId?.toString() === userId?.toString();
+        const isAuthor = existing.userId?.toString() === userId?.toString();
+        if (!isProvider && !isAuthor) {
+          throw new ApiError(403, "You are not authorized to delete this review");
+        }
+      }
+
+      await TrustScore.findByIdAndDelete(id);
 
       return res
         .status(200)
-        .json(new ApiResponse(200, result, "Deleted successfully"));
+        .json(new ApiResponse(200, existing, "Deleted successfully"));
     } catch (err) {
       next(err);
     }

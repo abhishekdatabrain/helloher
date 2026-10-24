@@ -637,6 +637,7 @@ export class MessageController {
             text: 1,
             status: 1,
             isRead: 1,
+            readAt: 1,
             createdAt: 1,
             media: 1,
             senderRole: 1,
@@ -772,7 +773,9 @@ export class MessageController {
       const unreadDocs = await Message.find(query).select("_id senderId receiverId").lean();
 
       if (unreadDocs.length > 0) {
-        await Message.updateMany(query, { $set: { status: "read", isRead: true } });
+        await Message.updateMany(query, {
+          $set: { status: "read", isRead: true, readAt: new Date() },
+        });
       }
 
       const updatedIds = unreadDocs.map((doc: any) => doc._id.toString());
@@ -801,6 +804,7 @@ export class MessageController {
           modifiedCount: unreadDocs.length,
           status: "read",
           isRead: true,
+          readAt: new Date(),
         };
 
         const emitToUser = (targetId: string) => {
@@ -836,6 +840,7 @@ export class MessageController {
           messageIds: updatedIds,
           status: "read",
           isRead: true,
+          readAt: new Date(),
         },
       });
     } catch (error) {
@@ -1068,6 +1073,7 @@ export class MessageController {
             text: 1,
             status: 1,
             isRead: 1,
+            readAt: 1,
             createdAt: 1,
             media: 1,
             senderRole: 1,

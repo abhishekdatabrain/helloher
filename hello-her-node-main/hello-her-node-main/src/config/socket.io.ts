@@ -544,7 +544,9 @@ export const configureSocket = async (
         const unreadDocs = await Message.find(query).select("_id senderId receiverId").lean();
         if (unreadDocs.length === 0) return;
 
-        await Message.updateMany(query, { $set: { status: "read", isRead: true } });
+        await Message.updateMany(query, {
+          $set: { status: "read", isRead: true, readAt: new Date() },
+        });
 
         const updatedIds = unreadDocs.map((m: any) => m._id.toString());
         const sId = rawSenderId?.toString() || unreadDocs[0].senderId.toString();
@@ -560,6 +562,7 @@ export const configureSocket = async (
           modifiedCount: unreadDocs.length,
           status: "read",
           isRead: true,
+          readAt: new Date(),
         };
 
         const emitToUser = (targetId: string) => {
