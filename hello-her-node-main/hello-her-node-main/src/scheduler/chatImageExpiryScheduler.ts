@@ -38,11 +38,13 @@ export const cleanExpiredProviderChatImages = async (
     // Find messages:
     // 1. Sent by provider (listener)
     // 2. Read/seen by user at least 10 minutes ago (fallback to updatedAt if readAt was null)
-    // 3. Contains at least one image in media
+    // 3. Contains at least one unexpired image in media
+    // 4. Not yet marked as expired
     const expiredMessages = await Message.find({
       senderRole: "provider",
       status: "read",
       isRead: true,
+      isExpired: { $ne: true },
       $or: [
         { readAt: { $exists: true, $ne: null, $lte: expiryTimeAgo } },
         { readAt: null, updatedAt: { $lte: expiryTimeAgo } },
@@ -64,7 +66,6 @@ export const cleanExpiredProviderChatImages = async (
       try {
         const mediaList = msg.media || [];
         const imageMedia = mediaList.filter((m) => m.type === "image");
-        const nonImageMedia = mediaList.filter((m) => m.type !== "image");
 
         // Delete each image file from S3
         for (const img of imageMedia) {
@@ -84,40 +85,42 @@ export const cleanExpiredProviderChatImages = async (
         const senderIdStr = msg.senderId.toString();
         const receiverIdStr = msg.receiverId.toString();
 
-        // If message has no other media and no text, delete the whole message document
-        if ((!msg.text || msg.text.trim() === "") && nonImageMedia.length === 0) {
-          await Message.findByIdAndDelete(msg._id);
-
-          // Real-time socket notification if active
-          if (io && getSocketUser) {
-            const senderSocket = getSocketUser(senderIdStr);
-            const receiverSocket = getSocketUser(receiverIdStr);
-            const payload = {
-              messageId: msg._id.toString(),
-              senderId: senderIdStr,
-              receiverId: receiverIdStr,
-              action: "deleted",
+        // ✅ Set isExpired flag so both User App & Provider App can see image expired
+        msg.isExpired = true;
+        msg.expiredAt = new Date();
+        msg.media = mediaList.map((m: any) => {
+          if (m.type === "image") {
+            const obj = m.toObject ? m.toObject() : m;
+            return {
+              ...obj,
+              url: "",
+              isExpired: true,
             };
-            if (senderSocket) io.to(senderSocket.socketId).emit("messageDeleted", payload);
-            if (receiverSocket) io.to(receiverSocket.socketId).emit("messageDeleted", payload);
           }
-        } else {
-          // If message still has text or other media, keep it but remove the image(s)
-          msg.media = nonImageMedia;
-          await msg.save();
+          return m;
+        });
 
-          if (io && getSocketUser) {
-            const senderSocket = getSocketUser(senderIdStr);
-            const receiverSocket = getSocketUser(receiverIdStr);
-            const payload = {
-              messageId: msg._id.toString(),
-              senderId: senderIdStr,
-              receiverId: receiverIdStr,
-              media: nonImageMedia,
-              action: "imagesExpired",
-            };
-            if (senderSocket) io.to(senderSocket.socketId).emit("messageMediaUpdated", payload);
-            if (receiverSocket) io.to(receiverSocket.socketId).emit("messageMediaUpdated", payload);
+        await msg.save();
+
+        // 🔔 Real-time socket notification to both Provider and User
+        if (io && getSocketUser) {
+          const senderSocket = getSocketUser(senderIdStr);
+          const receiverSocket = getSocketUser(receiverIdStr);
+          const payload = {
+            messageId: msg._id.toString(),
+            senderId: senderIdStr,
+            receiverId: receiverIdStr,
+            isExpired: true,
+            expiredAt: msg.expiredAt,
+            action: "mediaExpired",
+          };
+          if (senderSocket) {
+            io.to(senderSocket.socketId).emit("mediaExpired", payload);
+            io.to(senderSocket.socketId).emit("messageMediaUpdated", payload);
+          }
+          if (receiverSocket) {
+            io.to(receiverSocket.socketId).emit("mediaExpired", payload);
+            io.to(receiverSocket.socketId).emit("messageMediaUpdated", payload);
           }
         }
 

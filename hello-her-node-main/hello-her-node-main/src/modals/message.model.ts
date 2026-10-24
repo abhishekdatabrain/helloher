@@ -8,6 +8,7 @@ export interface IMessageMedia {
   mimeType?: string;
   size?: number;       // in bytes
   duration?: number;   // for audio/video (seconds)
+  isExpired?: boolean;
 }
 
 export interface IMessage extends Document {
@@ -16,6 +17,8 @@ export interface IMessage extends Document {
   status: "sent" | "delivered" | "read";
   isRead: boolean;
   readAt?: Date | null;
+  isExpired?: boolean;
+  expiredAt?: Date | null;
   senderId: Types.ObjectId;
   receiverId: Types.ObjectId;
   senderRole: "user" | "provider";
@@ -25,7 +28,7 @@ export interface IMessage extends Document {
 
 const messageMediaSchema = new Schema<IMessageMedia>(
   {
-    url: { type: String, required: true, trim: true },
+    url: { type: String, default: "", trim: true },
     type: {
       type: String,
       enum: ["image", "video", "audio", "file"],
@@ -34,6 +37,7 @@ const messageMediaSchema = new Schema<IMessageMedia>(
     mimeType: { type: String },
     size: { type: Number },
     duration: { type: Number },
+    isExpired: { type: Boolean, default: false },
   },
   { _id: false } // prevents auto _id for each media item
 );
@@ -60,6 +64,8 @@ const messageSchema = new Schema<IMessage>(
     },
     isRead: { type: Boolean, default: false },
     readAt: { type: Date, default: null },
+    isExpired: { type: Boolean, default: false },
+    expiredAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
