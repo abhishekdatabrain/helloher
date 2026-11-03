@@ -14,6 +14,19 @@ dotenv.config();
 
 const messageService = new CommonService(Message);
 
+const resolveDisplayNameExpr = (field: string) => ({
+  $cond: [
+    {
+      $and: [
+        { $ne: [`$${field}.alias`, null] },
+        { $ne: [`$${field}.alias`, ""] },
+      ],
+    },
+    `$${field}.alias`,
+    { $ifNull: [`$${field}.name`, ""] },
+  ],
+});
+
 export class MessageController {
 
   // 💬 Create Message (API owns messages)
@@ -600,15 +613,15 @@ export class MessageController {
             senderInfo: {
               $cond: [
                 { $eq: ["$senderRole", "user"] },
-                { $arrayElemAt: ["$senderUser", 0] },
-                { $arrayElemAt: ["$senderProvider", 0] },
+                { $ifNull: [{ $arrayElemAt: ["$senderUser", 0] }, { $arrayElemAt: ["$senderProvider", 0] }] },
+                { $ifNull: [{ $arrayElemAt: ["$senderProvider", 0] }, { $arrayElemAt: ["$senderUser", 0] }] },
               ],
             },
             receiverInfo: {
               $cond: [
                 { $eq: ["$senderRole", "user"] },
-                { $arrayElemAt: ["$receiverProvider", 0] },
-                { $arrayElemAt: ["$receiverUser", 0] },
+                { $ifNull: [{ $arrayElemAt: ["$receiverProvider", 0] }, { $arrayElemAt: ["$receiverUser", 0] }] },
+                { $ifNull: [{ $arrayElemAt: ["$receiverUser", 0] }, { $arrayElemAt: ["$receiverProvider", 0] }] },
               ],
             },
           },
@@ -645,7 +658,8 @@ export class MessageController {
             senderRole: 1,
             senderId: 1,
             receiverId: 1,
-            "senderInfo.name": 1,
+            receiverName: resolveDisplayNameExpr("receiverInfo"),
+            "senderInfo.name": resolveDisplayNameExpr("senderInfo"),
             "senderInfo.providerId": 1,
             "senderInfo.activeImageType": 1,
             "senderInfo.activeImageUrl": {
@@ -655,7 +669,7 @@ export class MessageController {
                 { $ifNull: ["$senderInfo.profilePicture", "$senderInfo.avatar"] }
               ]
             },
-            "receiverInfo.name": 1,
+            "receiverInfo.name": resolveDisplayNameExpr("receiverInfo"),
             "receiverInfo.providerId": 1,
             "receiverInfo.activeImageType": 1,
             "receiverInfo.activeImageUrl": {
@@ -969,15 +983,15 @@ export class MessageController {
             senderInfo: {
               $cond: [
                 { $eq: ["$lastMessage.senderRole", "user"] },
-                { $arrayElemAt: ["$senderUser", 0] },
-                { $arrayElemAt: ["$senderProvider", 0] },
+                { $ifNull: [{ $arrayElemAt: ["$senderUser", 0] }, { $arrayElemAt: ["$senderProvider", 0] }] },
+                { $ifNull: [{ $arrayElemAt: ["$senderProvider", 0] }, { $arrayElemAt: ["$senderUser", 0] }] },
               ],
             },
             receiverInfo: {
               $cond: [
                 { $eq: ["$lastMessage.senderRole", "user"] },
-                { $arrayElemAt: ["$receiverProvider", 0] },
-                { $arrayElemAt: ["$receiverUser", 0] },
+                { $ifNull: [{ $arrayElemAt: ["$receiverProvider", 0] }, { $arrayElemAt: ["$receiverUser", 0] }] },
+                { $ifNull: [{ $arrayElemAt: ["$receiverUser", 0] }, { $arrayElemAt: ["$receiverProvider", 0] }] },
               ],
             },
           },
@@ -990,10 +1004,11 @@ export class MessageController {
             createdAt: "$lastMessage.createdAt",
             status: "$lastMessage.status",
             isRead: "$lastMessage.isRead",
+            receiverName: resolveDisplayNameExpr("receiverInfo"),
             sender: {
               _id: "$lastMessage.senderId",
               role: "$lastMessage.senderRole",
-              name: "$senderInfo.name",
+              name: resolveDisplayNameExpr("senderInfo"),
               activeImageType: "$senderInfo.activeImageType",
               activeImageUrl: {
                 $cond: [
@@ -1005,7 +1020,7 @@ export class MessageController {
             },
             receiver: {
               _id: "$lastMessage.receiverId",
-              name: "$receiverInfo.name",
+              name: resolveDisplayNameExpr("receiverInfo"),
               activeImageType: "$receiverInfo.activeImageType",
               activeImageUrl: {
                 $cond: [
@@ -1024,6 +1039,10 @@ export class MessageController {
       const adminId = process.env.ADMIN_USER_ID;
 
       conversations.forEach((msg: any) => {
+        if (!msg.receiverName && msg.receiver?.name) {
+          msg.receiverName = msg.receiver.name;
+        }
+
         const canRead =
           msg.sender._id.toString() === currentUserId ||
           msg.receiver._id.toString() === currentUserId ||
@@ -1057,15 +1076,15 @@ export class MessageController {
             senderInfo: {
               $cond: [
                 { $eq: ["$senderRole", "user"] },
-                { $arrayElemAt: ["$senderUser", 0] },
-                { $arrayElemAt: ["$senderProvider", 0] },
+                { $ifNull: [{ $arrayElemAt: ["$senderUser", 0] }, { $arrayElemAt: ["$senderProvider", 0] }] },
+                { $ifNull: [{ $arrayElemAt: ["$senderProvider", 0] }, { $arrayElemAt: ["$senderUser", 0] }] },
               ],
             },
             receiverInfo: {
               $cond: [
                 { $eq: ["$senderRole", "user"] },
-                { $arrayElemAt: ["$receiverProvider", 0] },
-                { $arrayElemAt: ["$receiverUser", 0] },
+                { $ifNull: [{ $arrayElemAt: ["$receiverProvider", 0] }, { $arrayElemAt: ["$receiverUser", 0] }] },
+                { $ifNull: [{ $arrayElemAt: ["$receiverUser", 0] }, { $arrayElemAt: ["$receiverProvider", 0] }] },
               ],
             },
           },
@@ -1081,9 +1100,10 @@ export class MessageController {
             createdAt: 1,
             media: 1,
             senderRole: 1,
-            "senderInfo.name": 1,
+            receiverName: resolveDisplayNameExpr("receiverInfo"),
+            "senderInfo.name": resolveDisplayNameExpr("senderInfo"),
             "senderInfo.profilePicture": 1,
-            "receiverInfo.name": 1,
+            "receiverInfo.name": resolveDisplayNameExpr("receiverInfo"),
             "receiverInfo.profilePicture": 1,
           },
         },
@@ -1196,15 +1216,15 @@ export class MessageController {
             senderInfo: {
               $cond: [
                 { $eq: ["$lastMessage.senderRole", "user"] },
-                { $arrayElemAt: ["$senderUser", 0] },
-                { $arrayElemAt: ["$senderProvider", 0] },
+                { $ifNull: [{ $arrayElemAt: ["$senderUser", 0] }, { $arrayElemAt: ["$senderProvider", 0] }] },
+                { $ifNull: [{ $arrayElemAt: ["$senderProvider", 0] }, { $arrayElemAt: ["$senderUser", 0] }] },
               ],
             },
             receiverInfo: {
               $cond: [
                 { $eq: ["$lastMessage.senderRole", "user"] },
-                { $arrayElemAt: ["$receiverProvider", 0] },
-                { $arrayElemAt: ["$receiverUser", 0] },
+                { $ifNull: [{ $arrayElemAt: ["$receiverProvider", 0] }, { $arrayElemAt: ["$receiverUser", 0] }] },
+                { $ifNull: [{ $arrayElemAt: ["$receiverUser", 0] }, { $arrayElemAt: ["$receiverProvider", 0] }] },
               ],
             },
           },
@@ -1219,10 +1239,11 @@ export class MessageController {
             status: "$lastMessage.status",
             isRead: "$lastMessage.isRead",
             unreadCount: 1,
+            receiverName: resolveDisplayNameExpr("receiverInfo"),
             sender: {
               _id: "$lastMessage.senderId",
               role: "$lastMessage.senderRole",
-              name: "$senderInfo.name",
+              name: resolveDisplayNameExpr("senderInfo"),
               activeImageType: "$senderInfo.activeImageType",
               activeImageUrl: {
                 $cond: [
@@ -1234,7 +1255,7 @@ export class MessageController {
             },
             receiver: {
               _id: "$lastMessage.receiverId",
-              name: "$receiverInfo.name",
+              name: resolveDisplayNameExpr("receiverInfo"),
               activeImageType: "$receiverInfo.activeImageType",
               activeImageUrl: {
                 $cond: [
@@ -1252,6 +1273,10 @@ export class MessageController {
       const adminId = process.env.ADMIN_USER_ID;
 
       conversations.forEach((msg: any) => {
+        if (!msg.receiverName && msg.receiver?.name) {
+          msg.receiverName = msg.receiver.name;
+        }
+
         const canRead =
           msg.sender._id.toString() === providerId.toString() ||
           msg.receiver._id.toString() === providerId.toString() ||
@@ -1347,15 +1372,15 @@ export class MessageController {
             senderInfo: {
               $cond: [
                 { $eq: ["$lastMessage.senderRole", "user"] },
-                { $arrayElemAt: ["$senderUser", 0] },
-                { $arrayElemAt: ["$senderProvider", 0] },
+                { $ifNull: [{ $arrayElemAt: ["$senderUser", 0] }, { $arrayElemAt: ["$senderProvider", 0] }] },
+                { $ifNull: [{ $arrayElemAt: ["$senderProvider", 0] }, { $arrayElemAt: ["$senderUser", 0] }] },
               ],
             },
             receiverInfo: {
               $cond: [
                 { $eq: ["$lastMessage.senderRole", "user"] },
-                { $arrayElemAt: ["$receiverProvider", 0] },
-                { $arrayElemAt: ["$receiverUser", 0] },
+                { $ifNull: [{ $arrayElemAt: ["$receiverProvider", 0] }, { $arrayElemAt: ["$receiverUser", 0] }] },
+                { $ifNull: [{ $arrayElemAt: ["$receiverUser", 0] }, { $arrayElemAt: ["$receiverProvider", 0] }] },
               ],
             },
           },
@@ -1370,10 +1395,11 @@ export class MessageController {
             status: "$lastMessage.status",
             isRead: "$lastMessage.isRead",
             unreadCount: 1,
+            receiverName: resolveDisplayNameExpr("receiverInfo"),
             sender: {
               _id: "$lastMessage.senderId",
               role: "$lastMessage.senderRole",
-              name: "$senderInfo.name",
+              name: resolveDisplayNameExpr("senderInfo"),
               activeImageType: "$senderInfo.activeImageType",
               activeImageUrl: {
                 $cond: [
@@ -1385,7 +1411,7 @@ export class MessageController {
             },
             receiver: {
               _id: "$lastMessage.receiverId",
-              name: "$receiverInfo.name",
+              name: resolveDisplayNameExpr("receiverInfo"),
               activeImageType: "$receiverInfo.activeImageType",
               activeImageUrl: {
                 $cond: [
@@ -1431,6 +1457,10 @@ export class MessageController {
       const adminId = process.env.ADMIN_USER_ID;
 
       conversations.forEach((msg: any) => {
+        if (!msg.receiverName && msg.receiver?.name) {
+          msg.receiverName = msg.receiver.name;
+        }
+
         const canRead =
           msg.sender._id.toString() === userId.toString() ||
           msg.receiver._id.toString() === userId.toString() ||
