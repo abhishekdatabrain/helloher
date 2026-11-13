@@ -22,7 +22,7 @@ interface CustomRequest extends Request {
   user?: IUser;
 }
 
-const resolveDisplayNameExpr = (field: string) => ({
+const resolveDisplayNameExpr = (field: string, fallback: string = "") => ({
   $cond: [
     {
       $and: [
@@ -31,7 +31,18 @@ const resolveDisplayNameExpr = (field: string) => ({
       ],
     },
     `$${field}.alias`,
-    { $ifNull: [`$${field}.name`, ""] },
+    {
+      $cond: [
+        {
+          $and: [
+            { $ne: [`$${field}.name`, null] },
+            { $ne: [`$${field}.name`, ""] },
+          ],
+        },
+        `$${field}.name`,
+        fallback,
+      ],
+    },
   ],
 });
 
@@ -966,14 +977,14 @@ export class CallController {
               $cond: [
                 { $eq: ["$callerModel", "User"] },
                 { $arrayElemAt: ["$callerUser", 0] },
-                { $arrayElemAt: ["$callerProvider", 0] },
+                { $ifNull: [{ $arrayElemAt: ["$calleeUser", 0] }, { $arrayElemAt: ["$callerProvider", 0] }] },
               ],
             },
             calleeInfo: {
               $cond: [
                 { $eq: ["$calleeModel", "User"] },
                 { $arrayElemAt: ["$calleeUser", 0] },
-                { $arrayElemAt: ["$calleeProvider", 0] },
+                { $ifNull: [{ $arrayElemAt: ["$callerUser", 0] }, { $arrayElemAt: ["$calleeProvider", 0] }] },
               ],
             },
           },
@@ -995,10 +1006,10 @@ export class CallController {
             createdAt: 1,
             updatedAt: 1,
             recordingMeta: 1,
-            receiverName: resolveDisplayNameExpr("calleeInfo"),
+            receiverName: resolveDisplayNameExpr("calleeInfo", "User"),
             receiver: {
               _id: "$calleeInfo._id",
-              name: resolveDisplayNameExpr("calleeInfo"),
+              name: resolveDisplayNameExpr("calleeInfo", "User"),
               phoneNumber: "$calleeInfo.phoneNumber",
               activeImageURL: {
                 $cond: [
@@ -1010,7 +1021,7 @@ export class CallController {
             },
             receiverInfo: {
               _id: "$calleeInfo._id",
-              name: resolveDisplayNameExpr("calleeInfo"),
+              name: resolveDisplayNameExpr("calleeInfo", "User"),
               phoneNumber: "$calleeInfo.phoneNumber",
               activeImageURL: {
                 $cond: [
@@ -1022,7 +1033,7 @@ export class CallController {
             },
             callerModel: 1,
             "callerInfo._id": 1,
-            "callerInfo.name": resolveDisplayNameExpr("callerInfo"),
+            "callerInfo.name": resolveDisplayNameExpr("callerInfo", "User"),
             "callerInfo.phoneNumber": 1,
             "callerInfo.activeImageURL": {
               $cond: [
@@ -1033,7 +1044,7 @@ export class CallController {
             },
             calleeModel: 1,
             "calleeInfo._id": 1,
-            "calleeInfo.name": resolveDisplayNameExpr("calleeInfo"),
+            "calleeInfo.name": resolveDisplayNameExpr("calleeInfo", "User"),
             "calleeInfo.phoneNumber": 1,
             "calleeInfo.activeImageURL": {
               $cond: [
@@ -1122,14 +1133,14 @@ export class CallController {
               $cond: [
                 { $eq: ["$callerModel", "User"] },
                 { $arrayElemAt: ["$callerUser", 0] },
-                { $arrayElemAt: ["$callerProvider", 0] }
+                { $ifNull: [{ $arrayElemAt: ["$calleeUser", 0] }, { $arrayElemAt: ["$callerProvider", 0] }] }
               ]
             },
             calleeInfo: {
               $cond: [
                 { $eq: ["$calleeModel", "User"] },
                 { $arrayElemAt: ["$calleeUser", 0] },
-                { $arrayElemAt: ["$calleeProvider", 0] }
+                { $ifNull: [{ $arrayElemAt: ["$callerUser", 0] }, { $arrayElemAt: ["$calleeProvider", 0] }] }
               ]
             }
           }
@@ -1144,10 +1155,10 @@ export class CallController {
             perMinutePricePaise: 1,
             createdAt: 1,
             updatedAt: 1,
-            receiverName: resolveDisplayNameExpr("calleeInfo"),
+            receiverName: resolveDisplayNameExpr("calleeInfo", "User"),
             receiver: {
               _id: "$calleeInfo._id",
-              name: resolveDisplayNameExpr("calleeInfo"),
+              name: resolveDisplayNameExpr("calleeInfo", "User"),
               phoneNumber: "$calleeInfo.phoneNumber",
               activeImageUrl: {
                 $cond: [
@@ -1166,7 +1177,7 @@ export class CallController {
             },
             receiverInfo: {
               _id: "$calleeInfo._id",
-              name: resolveDisplayNameExpr("calleeInfo"),
+              name: resolveDisplayNameExpr("calleeInfo", "User"),
               phoneNumber: "$calleeInfo.phoneNumber",
               activeImageUrl: {
                 $cond: [
@@ -1185,7 +1196,7 @@ export class CallController {
             },
             callerModel: 1,
             "callerInfo._id": 1,
-            "callerInfo.name": resolveDisplayNameExpr("callerInfo"),
+            "callerInfo.name": resolveDisplayNameExpr("callerInfo", "User"),
             "callerInfo.phoneNumber": 1,
             // "callerInfo.profilePicture": 1,
             // "callerInfo.avatar": 1,
@@ -1198,7 +1209,7 @@ export class CallController {
             },
             calleeModel: 1,
             "calleeInfo._id": 1,
-            "calleeInfo.name": resolveDisplayNameExpr("calleeInfo"),
+            "calleeInfo.name": resolveDisplayNameExpr("calleeInfo", "User"),
             "calleeInfo.phoneNumber": 1,
             // "calleeInfo.profilePicture": 1,
             // "calleeInfo.avatar": 1,
