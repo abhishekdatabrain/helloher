@@ -17,19 +17,13 @@ const messageService = new CommonService(Message);
 const resolveDisplayNameExpr = (field: string, fallback: string = "") => ({
   $cond: [
     {
-      $and: [
-        { $ne: [`$${field}.alias`, null] },
-        { $ne: [`$${field}.alias`, ""] },
-      ],
+      $ne: [{ $ifNull: [`$${field}.alias`, ""] }, ""],
     },
     `$${field}.alias`,
     {
       $cond: [
         {
-          $and: [
-            { $ne: [`$${field}.name`, null] },
-            { $ne: [`$${field}.name`, ""] },
-          ],
+          $ne: [{ $ifNull: [`$${field}.name`, ""] }, ""],
         },
         `$${field}.name`,
         fallback,
@@ -1251,6 +1245,8 @@ export class MessageController {
             isRead: "$lastMessage.isRead",
             unreadCount: 1,
             receiverName: resolveDisplayNameExpr("receiverInfo", "User"),
+            isOnline: { $ifNull: ["$receiverInfo.isOnline", false] },
+            lastSeen: { $ifNull: ["$receiverInfo.lastSeen", null] },
             sender: {
               _id: "$lastMessage.senderId",
               role: "$lastMessage.senderRole",
@@ -1273,6 +1269,8 @@ export class MessageController {
                 ],
               },
               name: resolveDisplayNameExpr("receiverInfo", "User"),
+              isOnline: { $ifNull: ["$receiverInfo.isOnline", false] },
+              lastSeen: { $ifNull: ["$receiverInfo.lastSeen", null] },
               activeImageType: "$receiverInfo.activeImageType",
               activeImageUrl: {
                 $cond: [
@@ -1288,10 +1286,22 @@ export class MessageController {
       ]);
 
       const adminId = process.env.ADMIN_USER_ID;
+      const getSocketUser = (req as any).app?.get?.("getSocketUser");
 
       conversations.forEach((msg: any) => {
         if (!msg.receiverName || msg.receiverName === "") {
           msg.receiverName = msg.receiver?.name || "User";
+        }
+        if (msg.receiver && (!msg.receiver.name || msg.receiver.name === "")) {
+          msg.receiver.name = msg.receiverName || "User";
+        }
+
+        const receiverIdStr = msg.receiver?._id?.toString();
+        const isLiveOnline = getSocketUser && receiverIdStr ? Boolean(getSocketUser(receiverIdStr)) : false;
+
+        if (isLiveOnline) {
+          msg.isOnline = true;
+          if (msg.receiver) msg.receiver.isOnline = true;
         }
 
         const canRead = true;
