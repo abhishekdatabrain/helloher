@@ -11,7 +11,11 @@ import ServiceProvider from "../../modals/serviceProvider.model";
 import CommissionModel from "../../modals/commission.model";
 import mongoose from "mongoose";
 import { scheduleAutoMissTimeout } from "../../utils/callTimeouts";
-import { getCallParticipantMeta } from "../../utils/callParticipantMeta";
+import {
+  getCallParticipantMeta,
+  resolveActiveImageUrl,
+  CallParticipantType,
+} from "../../utils/callParticipantMeta";
 const callService = new CommonService(CallSession);
 
 // Simple in-memory cache to store channel per user
@@ -25,19 +29,13 @@ interface CustomRequest extends Request {
 const resolveDisplayNameExpr = (field: string, fallback: string = "") => ({
   $cond: [
     {
-      $and: [
-        { $ne: [`$${field}.alias`, null] },
-        { $ne: [`$${field}.alias`, ""] },
-      ],
+      $ne: [{ $ifNull: [`$${field}.alias`, ""] }, ""],
     },
     `$${field}.alias`,
     {
       $cond: [
         {
-          $and: [
-            { $ne: [`$${field}.name`, null] },
-            { $ne: [`$${field}.name`, ""] },
-          ],
+          $ne: [{ $ifNull: [`$${field}.name`, ""] }, ""],
         },
         `$${field}.name`,
         fallback,
@@ -115,9 +113,11 @@ export class CallController {
         channelCache.delete(callerId);
       }
 
-      const callerType =
-        callerRole === "ServiceProvider" ? "ServiceProvider" : "User";
-      const calleeType =
+      const isCallerProvider =
+        typeof callerRole === "string" &&
+        ["serviceprovider", "provider"].includes(callerRole.trim().toLowerCase());
+      const callerType: CallParticipantType = isCallerProvider ? "ServiceProvider" : "User";
+      const calleeType: CallParticipantType =
         callerType === "ServiceProvider" ? "User" : "ServiceProvider";
 
       // 🚫 Prevent blocked users from initiating calls to a provider
@@ -168,6 +168,42 @@ export class CallController {
         console.warn("⚠️ Error resolving caller meta:", err);
       }
 
+      // Resolve Callee (Listener) metadata
+      let calleeName = calleeId;
+      let calleeAlias = "";
+      let calleeImageUrl: string | null = null;
+      let calleeProvider: any = null;
+
+      if (calleeType === "ServiceProvider") {
+        try {
+          calleeProvider = await ServiceProvider.findById(calleeId).select(
+            "name alias profilePicture avatar activeImageType",
+          );
+          if (calleeProvider) {
+            const alias = calleeProvider.alias ? calleeProvider.alias.trim() : "";
+            const name = calleeProvider.name ? calleeProvider.name.trim() : "";
+            calleeAlias = alias;
+            calleeName = alias || name || calleeId;
+            calleeImageUrl = resolveActiveImageUrl(calleeProvider);
+          }
+        } catch (calleeErr) {
+          console.warn("⚠️ Error resolving callee provider meta:", calleeErr);
+        }
+      } else {
+        try {
+          const calleeUser = await User.findById(calleeId).select(
+            "name profilePicture avatar activeImageType",
+          );
+          if (calleeUser) {
+            const name = calleeUser.name ? calleeUser.name.trim() : "";
+            calleeName = name || calleeId;
+            calleeImageUrl = resolveActiveImageUrl(calleeUser);
+          }
+        } catch (calleeErr) {
+          console.warn("⚠️ Error resolving callee user meta:", calleeErr);
+        }
+      }
+
       if (callerType === "User" && calleeType === "ServiceProvider") {
         try {
           // Check if there are any previous calls from this user to this provider
@@ -206,6 +242,12 @@ export class CallController {
           callerProfileImage: callerImageUrl,
           callerType,
           calleeId,
+          calleeName,
+          callee_name: calleeName,
+          calleeAlias: calleeAlias || calleeName,
+          listenerName: calleeName,
+          listenerAlias: calleeAlias || calleeName,
+          calleeImageUrl,
           perMinutePricePaise: result.session.perMinutePricePaise,
           isNewUser,
         });
@@ -214,6 +256,7 @@ export class CallController {
           calleeId,
           callerName,
           callerImageUrl,
+          calleeName,
           isNewUser,
           socketId: calleeSocketUser.socketId,
         });
@@ -226,23 +269,7 @@ export class CallController {
         const { createAndEmitNotification } = await import("../../services/notificationHelper.service");
         const calleeRoleType = calleeType === "User" ? "user" : "provider";
         const callerRoleType = callerType === "User" ? "user" : "provider";
-
-        // Resolve caller name for a better notification message
-        let callerDisplayName = callerId;
-        try {
-          if (callerType === "User") {
-            const callerUser = await User.findById(callerId).select("name");
-            if (callerUser?.name) callerDisplayName = callerUser.name;
-          } else {
-            const callerProvider = await ServiceProvider.findById(callerId).select("alias name");
-            callerDisplayName =
-              callerProvider?.alias ||
-              callerProvider?.name ||
-              callerDisplayName;
-          }
-        } catch (nameLookupErr) {
-          console.warn("Could not fetch caller name for notification:", nameLookupErr);
-        }
+        const callerDisplayName = callerName;
 
         await createAndEmitNotification({
           type: "call_received",
@@ -263,6 +290,12 @@ export class CallController {
             caller_name: callerName,
             callerImageUrl,
             caller_image_url: callerImageUrl,
+            calleeName,
+            callee_name: calleeName,
+            calleeAlias: calleeAlias || calleeName,
+            listenerName: calleeName,
+            listenerAlias: calleeAlias || calleeName,
+            calleeImageUrl,
             isNewUser,
           },
           io,
@@ -284,10 +317,33 @@ export class CallController {
         console.error("Failed to schedule auto-miss timeout:", err);
       }
 
-      // ✅ THEN return response
+      // ✅ THEN return response with listener's alias / metadata
+      const sessionObj =
+        typeof (result.session as any)?.toObject === "function"
+          ? (result.session as any).toObject()
+          : { ...(result.session as any) };
+
+      sessionObj.calleeName = calleeName;
+      sessionObj.callee_name = calleeName;
+      sessionObj.calleeAlias = calleeAlias || calleeName;
+      sessionObj.listenerName = calleeName;
+      sessionObj.listenerAlias = calleeAlias || calleeName;
+      sessionObj.calleeImageUrl = calleeImageUrl;
+      sessionObj.callee_image_url = calleeImageUrl;
+      if (calleeProvider) {
+        sessionObj.calleeInfo = {
+          _id: calleeProvider._id,
+          name: calleeName,
+          alias: calleeAlias || calleeProvider.name,
+          activeImageUrl: calleeImageUrl,
+          profilePicture: calleeProvider.profilePicture || null,
+          avatar: calleeProvider.avatar || null,
+        };
+      }
+
       return res
         .status(201)
-        .json(new ApiResponse(201, result.session, "Call initiated"));
+        .json(new ApiResponse(201, sessionObj, "Call initiated"));
       // return res
       //   .status(201)
       //   .json(new ApiResponse(201, result.session, "Call initiated"));
@@ -977,14 +1033,14 @@ export class CallController {
               $cond: [
                 { $eq: ["$callerModel", "User"] },
                 { $arrayElemAt: ["$callerUser", 0] },
-                { $ifNull: [{ $arrayElemAt: ["$calleeUser", 0] }, { $arrayElemAt: ["$callerProvider", 0] }] },
+                { $arrayElemAt: ["$callerProvider", 0] },
               ],
             },
             calleeInfo: {
               $cond: [
                 { $eq: ["$calleeModel", "User"] },
                 { $arrayElemAt: ["$calleeUser", 0] },
-                { $ifNull: [{ $arrayElemAt: ["$callerUser", 0] }, { $arrayElemAt: ["$calleeProvider", 0] }] },
+                { $arrayElemAt: ["$calleeProvider", 0] },
               ],
             },
           },
@@ -1133,17 +1189,17 @@ export class CallController {
               $cond: [
                 { $eq: ["$callerModel", "User"] },
                 { $arrayElemAt: ["$callerUser", 0] },
-                { $ifNull: [{ $arrayElemAt: ["$calleeUser", 0] }, { $arrayElemAt: ["$callerProvider", 0] }] }
-              ]
+                { $arrayElemAt: ["$callerProvider", 0] },
+              ],
             },
             calleeInfo: {
               $cond: [
                 { $eq: ["$calleeModel", "User"] },
                 { $arrayElemAt: ["$calleeUser", 0] },
-                { $ifNull: [{ $arrayElemAt: ["$callerUser", 0] }, { $arrayElemAt: ["$calleeProvider", 0] }] }
-              ]
-            }
-          }
+                { $arrayElemAt: ["$calleeProvider", 0] },
+              ],
+            },
+          },
         },
         {
           $project: {

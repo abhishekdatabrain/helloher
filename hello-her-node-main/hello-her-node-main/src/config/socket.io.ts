@@ -285,10 +285,12 @@ export const configureSocket = async (
           const callee = getUser(calleeId);
           const effectiveChannel = channel || session.channel;
           const callerType = session.callerModel as "User" | "ServiceProvider";
-          const callerMeta = await getCallParticipantMeta(
-            session.caller.toString(),
-            callerType,
-          );
+          const calleeType = session.calleeModel as "User" | "ServiceProvider";
+
+          const [callerMeta, calleeMeta] = await Promise.all([
+            getCallParticipantMeta(session.caller.toString(), callerType),
+            getCallParticipantMeta(session.callee.toString(), calleeType),
+          ]);
 
           // Notify callee if online
           if (callee) {
@@ -304,6 +306,13 @@ export const configureSocket = async (
               caller_image_url: callerMeta.callerImageUrl,
               callerProfileImage: callerMeta.callerImageUrl,
               callerType,
+              calleeId,
+              calleeName: calleeMeta.callerName,
+              callee_name: calleeMeta.callerName,
+              calleeAlias: calleeMeta.callerAlias || calleeMeta.callerName,
+              listenerName: calleeMeta.callerName,
+              listenerAlias: calleeMeta.callerAlias || calleeMeta.callerName,
+              calleeImageUrl: calleeMeta.callerImageUrl,
             });
           } else {
             io.to(socket.id).emit("call_unreachable", { sessionId, reason: "CALLEE_OFFLINE" });
@@ -357,11 +366,29 @@ export const configureSocket = async (
         const caller = getUser(callerId);
         const effectiveChannel = channel || currentSession.channel;
 
+        let listenerDisplayName = "";
+        let listenerAlias = "";
+        if (currentSession.calleeModel === "ServiceProvider") {
+          try {
+            const prov = await Provider.findById(currentSession.callee).select("name alias");
+            if (prov) {
+              listenerAlias = prov.alias ? prov.alias.trim() : "";
+              const name = prov.name ? prov.name.trim() : "";
+              listenerDisplayName = listenerAlias || name || "";
+            }
+          } catch (calleeLookupErr) {
+            console.warn("accept_call: failed to lookup callee provider", calleeLookupErr);
+          }
+        }
+
         if (caller) {
           io.to(caller.socketId).emit("call_accepted", {
             sessionId,
             channel: effectiveChannel,
             accepterSocketId: socket.id,
+            listenerName: listenerDisplayName,
+            listenerAlias: listenerAlias || listenerDisplayName,
+            calleeName: listenerDisplayName,
           });
 
           console.log("[CALL] Call accepted", {

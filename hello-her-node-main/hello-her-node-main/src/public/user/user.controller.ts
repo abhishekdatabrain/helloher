@@ -1102,29 +1102,130 @@ export class UserController {
         throw new ApiError(401, "User not authenticated");
       }
 
-      const user = await User.findById(userId)
-        .populate({
-          path: "favorites",
-          model: "ServiceProvider",
-          select:
-            "_id name alias email phoneNumber profilePicture avatar activeImageType bio languages perMinutePricePaise isOnline lastActive trustScore avgRating totalCalls",
-          populate: {
-            path: "languages",
-            select: "name code",
-          },
-        })
-        .lean();
+      const user = await User.findById(userId).select("favorites").lean();
+      const rawFavoriteIds = (user?.favorites || []) as any[];
 
-      const favorites = ((user?.favorites as any[]) || []).map((provider: any) => {
-        if (!provider || typeof provider !== "object") return provider;
+      const validFavoriteIds = rawFavoriteIds
+        .map((id: any) => (id?._id ? id._id.toString() : id?.toString()))
+        .filter((id: string) => id && mongoose.Types.ObjectId.isValid(id))
+        .map((id: string) => new mongoose.Types.ObjectId(id));
+
+      if (validFavoriteIds.length === 0) {
+        return res.status(200).json(
+          new ApiResponse(
+            200,
+            {
+              favorites: [],
+              total: 0,
+            },
+            "Favorite listeners fetched successfully"
+          )
+        );
+      }
+
+      const Commission = (await import("../../modals/commission.model")).default;
+      const ServiceProvider = (await import("../../modals/serviceProvider.model")).default;
+
+      const [commission, providers] = await Promise.all([
+        Commission.findOne().lean(),
+        ServiceProvider.find({
+          _id: { $in: validFavoriteIds },
+          isDeleted: false,
+        }).lean(),
+      ]);
+
+      const perMinutePricePaise = commission?.perMinutePricePaise ?? 600;
+      const perMinutePrice = perMinutePricePaise / 100;
+
+      // Extract language ObjectIds safely without casting strings like "Hindi"
+      const allLanguageIds = new Set<string>();
+      providers.forEach((p: any) => {
+        if (Array.isArray(p.languages)) {
+          p.languages.forEach((l: any) => {
+            const strId = l?.toString();
+            if (strId && mongoose.Types.ObjectId.isValid(strId)) {
+              allLanguageIds.add(strId);
+            }
+          });
+        }
+      });
+
+      const languageDocs =
+        allLanguageIds.size > 0
+          ? await Language.find({
+              _id: { $in: Array.from(allLanguageIds).map((id) => new mongoose.Types.ObjectId(id)) },
+            }).lean()
+          : [];
+
+      const languageMap = new Map<string, any>();
+      languageDocs.forEach((lang: any) => {
+        languageMap.set(lang._id.toString(), lang);
+      });
+
+      const favorites = providers.map((provider: any) => {
         const activeImageUrl =
           provider.activeImageType === "avatar"
             ? provider.avatar || provider.profilePicture || null
             : provider.profilePicture || provider.avatar || null;
+
+        const resolvedLanguages: any[] = [];
+        const languageNames: string[] = [];
+
+        if (Array.isArray(provider.languages)) {
+          provider.languages.forEach((langItem: any) => {
+            const langStr = langItem?.toString();
+            if (langStr && languageMap.has(langStr)) {
+              const langDoc = languageMap.get(langStr);
+              resolvedLanguages.push({
+                _id: langDoc._id,
+                name: langDoc.label,
+                label: langDoc.label,
+                code: langDoc.value,
+                value: langDoc.value,
+              });
+              languageNames.push(langDoc.label);
+            } else if (typeof langItem === "string" && !mongoose.Types.ObjectId.isValid(langItem)) {
+              // Gracefully handle legacy strings like "Hindi", "English"
+              resolvedLanguages.push({
+                name: langItem,
+                label: langItem,
+                code: langItem.toLowerCase(),
+                value: langItem,
+              });
+              languageNames.push(langItem);
+            }
+          });
+        }
+
         return {
-          ...provider,
+          _id: provider._id,
+          name: provider.name,
+          alias: provider.alias || provider.name,
+          email: provider.email,
+          phoneNumber: provider.phoneNumber,
+          profilePicture: provider.profilePicture || null,
+          avatar: provider.avatar || null,
+          activeImageType: provider.activeImageType || "profilePicture",
           activeImageUrl,
+          bio: provider.bio || "",
+          age: provider.age,
+          role: provider.role || "provider",
+          providerId: provider.providerId,
+          isOnline: provider.isOnline ?? false,
+          isOnCall: provider.isOnCall ?? false,
+          lastActive: provider.lastActive,
+          averageRating: provider.averageRating ?? 0,
+          avgRating: provider.averageRating ?? 0,
+          totalRatings: provider.totalRatings ?? 0,
+          trustScore: 100,
+          perMinutePricePaise,
+          perMinutePrice,
+          languages: resolvedLanguages,
+          languageObject: languageNames,
+          languageNames,
           isFavorite: true,
+          audioNote: provider.audioNote || null,
+          audioSample: provider.audioSample || null,
         };
       });
 
