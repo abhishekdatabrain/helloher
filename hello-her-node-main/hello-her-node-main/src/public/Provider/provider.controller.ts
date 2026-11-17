@@ -25,6 +25,11 @@ import { TrustScore } from "../../modals/trustScore.model";
 import { applyAvailabilityPenalties } from "../../services/availabilityPenalty.service";
 import { sendLoginOtpSms } from "../../services/msg91.service";
 import { Chat } from "../../modals/chat.model";
+import {
+  DUMMY_OTP,
+  isDummyProviderPhone,
+  ensureDummyProvider,
+} from "../../config/dummyCredentials";
 
 const providerService = new CommonService(ServiceProvider);
 const bankAccountService = new CommonService(BankAccount);
@@ -38,6 +43,7 @@ const ALLOWED_WARNING_LEVELS = ["clear", "level1", "level2", "level3", "ignored_
 const OTP_FALLBACK_PHONE_NUMBERS = new Set([
   "9638527410", // Rashmi - service provider
   "9648756737", // Ronit Test - user
+  "8888880123", // Dummy listener
 ]);
 const OTP_FALLBACK_CODE = "123456";
 
@@ -2725,6 +2731,10 @@ export class ProviderController {
         throw new ApiError(400, "Phone number is required");
       }
 
+      if (isDummyProviderPhone(phoneNumber)) {
+        await ensureDummyProvider(phoneNumber);
+      }
+
       // ✅ Find provider first
       const provider = await ServiceProvider.findOne({ phoneNumber }).select(
         "+password"
@@ -2785,7 +2795,9 @@ export class ProviderController {
       // If password auth did not pass, try OTP (if provided)
       if (!isAuthenticated && hasOtpInput) {
         const isFallbackOtp =
-          OTP_FALLBACK_PHONE_NUMBERS.has(phoneNumber) && otp === OTP_FALLBACK_CODE;
+          (OTP_FALLBACK_PHONE_NUMBERS.has(phoneNumber) &&
+            (otp === OTP_FALLBACK_CODE || otp === DUMMY_OTP)) ||
+          (isDummyProviderPhone(phoneNumber) && otp === DUMMY_OTP);
 
         if (isFallbackOtp) {
           isAuthenticated = true;
@@ -2860,6 +2872,10 @@ export class ProviderController {
       );
       if (!phoneNumber) throw new ApiError(400, "Phone number is required");
 
+      if (isDummyProviderPhone(phoneNumber)) {
+        await ensureDummyProvider(phoneNumber);
+      }
+
       const provider = await ServiceProvider.findOne({ phoneNumber });
       if (!provider) throw new ApiError(404, "Provider not found");
       if (provider.isDeleted) {
@@ -2869,8 +2885,13 @@ export class ProviderController {
         throw new ApiError(403, "Your account is not allowed to request OTP");
       }
 
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-      const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+      const isDummy = isDummyProviderPhone(phoneNumber);
+      const otpCode = isDummy
+        ? DUMMY_OTP
+        : Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(
+        Date.now() + (isDummy ? 365 * 24 * 60 * 60 * 1000 : 5 * 60 * 1000)
+      );
 
       await Otp.findOneAndUpdate(
         { phoneNumber },
@@ -2878,11 +2899,13 @@ export class ProviderController {
         { upsert: true, new: true }
       );
 
-      await sendLoginOtpSms(phoneNumber, otpCode); // send sms
+      if (!isDummy) {
+        await sendLoginOtpSms(phoneNumber, otpCode); // send sms
+      }
       console.log(`OTP for ${phoneNumber}: ${otpCode}`);
 
       const responseData: Record<string, string> = { phoneNumber };
-      if (config.env === "development") {
+      if (config.env === "development" || isDummy) {
         responseData.otpCode = otpCode;
       }
 

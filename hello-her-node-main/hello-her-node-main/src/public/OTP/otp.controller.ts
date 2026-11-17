@@ -8,11 +8,17 @@ import { User } from "../../modals/user.model";
 import jwt from "jsonwebtoken";
 import { config } from "../../config/config";
 import { sendLoginOtpSms } from "../../services/msg91.service";
+import {
+  DUMMY_OTP,
+  isDummyUserPhone,
+  ensureDummyUser,
+} from "../../config/dummyCredentials";
 
 const otpService = new CommonService(Otp);
 const OTP_FALLBACK_PHONE_NUMBERS = new Set([
   "9638527410", // Rashmi - service provider
   "9648756737", // Ronit Test - user
+  "9999990123", // Dummy user
 ]);
 const OTP_FALLBACK_CODE = "123456";
 
@@ -25,8 +31,9 @@ export class OtpController {
     const phoneNumber = OtpController.normalizePhoneNumber(req.body?.phoneNumber);
     if (!phoneNumber) throw new ApiError(400, "Phone number required");
 
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    const isDummy = isDummyUserPhone(phoneNumber);
+    const otpCode = isDummy ? DUMMY_OTP : Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + (isDummy ? 365 * 24 * 60 * 60 * 1000 : 5 * 60 * 1000));
 
     await Otp.findOneAndUpdate(
       { phoneNumber },
@@ -34,11 +41,13 @@ export class OtpController {
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-    await sendLoginOtpSms(phoneNumber, otpCode); // send sms
+    if (!isDummy) {
+      await sendLoginOtpSms(phoneNumber, otpCode); // send sms
+    }
     console.log(`OTP for ${phoneNumber}: ${otpCode}`);
 
     const responseData: Record<string, string> = { phoneNumber };
-    if (config.env === "development") {
+    if (config.env === "development" || isDummy) {
       responseData.otpCode = otpCode;
     }
 
@@ -67,8 +76,10 @@ export class OtpController {
     if (!phoneNumber || !otp)
       throw new ApiError(400, "Phone number & OTP required");
 
+    const isDummy = isDummyUserPhone(phoneNumber);
     const isFallbackOtp =
-      OTP_FALLBACK_PHONE_NUMBERS.has(phoneNumber) && otp === OTP_FALLBACK_CODE;
+      (OTP_FALLBACK_PHONE_NUMBERS.has(phoneNumber) && otp === OTP_FALLBACK_CODE) ||
+      (isDummy && otp === DUMMY_OTP);
 
     if (!isFallbackOtp) {
       const otpDoc = await Otp.findOne({ phoneNumber, otp, verified: false });
@@ -78,7 +89,11 @@ export class OtpController {
       otpDoc.verified = true;
       await otpDoc.save();
     }
-    const user = await User.findOne({ phoneNumber, isDeleted: false }).select("-password -__v");
+    let user = await User.findOne({ phoneNumber, isDeleted: false }).select("-password -__v");
+
+    if (!user && isDummy) {
+      user = await ensureDummyUser(phoneNumber);
+    }
 
     // if (!user) {
     //   return res
