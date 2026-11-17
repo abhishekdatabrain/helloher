@@ -12,6 +12,7 @@ import { corsOptions } from "./middlewares/corsMiddleware";
 import { notFoundHandler } from "./middlewares/notFounHandler";
 import { globalErrorHandler } from "./middlewares/errorHandler";
 import { walletResetJob } from "./admin/admin/walletJob";
+import accountDeletionRouter from "./public/accountDeletion/accountDeletion.routes";
 
 const app = express();
 walletResetJob();
@@ -75,6 +76,10 @@ app.use(async (req: express.Request, res: express.Response, next: express.NextFu
   });
   next();
 });
+
+// Account Deletion Web Views & Endpoints (Google Play / App Store Compliance)
+app.use("/delete-account", accountDeletionRouter);
+app.use("/account-deletion", accountDeletionRouter);
 
 // Handle Public API Routes
 app.use("/api", routes);

@@ -59,6 +59,7 @@ import walletTransactionRoutes from "../public/Wallet_Transaction/walletTransact
 import helpdeskRoutes from "../public/helpdesk/helpdesk.routes";
 import chatRequestRoutes from "../public/chatRequest/chatRequest.routes";
 import trustScoreRoutes from "../public/trustScore/trustScore.routes";
+import accountDeletionRouter from "../public/accountDeletion/accountDeletion.routes";
 
 const router = Router();
 
@@ -109,5 +110,6 @@ router.use("/paid-profile", paidProfileRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/trustScore", trustScoreRoutes);
 router.use("/helpdesk", helpdeskRoutes);
+router.use("/account-deletion", accountDeletionRouter);
 
 export default router;
