@@ -110,6 +110,7 @@ router.use("/paid-profile", paidProfileRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/trustScore", trustScoreRoutes);
 router.use("/helpdesk", helpdeskRoutes);
+router.use("/delete-account", accountDeletionRouter);
 router.use("/account-deletion", accountDeletionRouter);
 
 export default router;

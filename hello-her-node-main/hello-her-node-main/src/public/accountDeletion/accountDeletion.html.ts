@@ -370,10 +370,10 @@ export function renderAccountDeletionHtml(selectedApp: DeletionAppType = "all"):
     <div class="card">
       <!-- App Type Selector -->
       <div class="app-toggle" id="appToggle">
-        <a href="/delete-account/user" class="app-btn ${initialApp === "user" ? "active" : ""}" id="tabUser" onclick="switchApp('user', event)">
+        <a href="javascript:void(0)" class="app-btn ${initialApp === "user" ? "active" : ""}" id="tabUser" onclick="switchApp('user', event)">
           <span>👤</span> User App
         </a>
-        <a href="/delete-account/listener" class="app-btn ${initialApp === "listener" ? "active" : ""}" id="tabListener" onclick="switchApp('listener', event)">
+        <a href="javascript:void(0)" class="app-btn ${initialApp === "listener" ? "active" : ""}" id="tabListener" onclick="switchApp('listener', event)">
           <span>🎧</span> Listener App
         </a>
       </div>
@@ -529,7 +529,11 @@ export function renderAccountDeletionHtml(selectedApp: DeletionAppType = "all"):
       hideAlerts();
       // Update browser URL without reload if history API available
       if (window.history && window.history.pushState) {
-        window.history.pushState({}, "", "/delete-account/" + app);
+        const isApiPath = window.location.pathname.includes("/api/");
+        const isAccountDeletion = window.location.pathname.includes("account-deletion");
+        const folder = isAccountDeletion ? "account-deletion" : "delete-account";
+        const basePrefix = (isApiPath ? "/api/" : "/") + folder + "/";
+        window.history.pushState({}, "", basePrefix + app);
       }
     }
 
