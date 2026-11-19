@@ -292,6 +292,14 @@ export const configureSocket = async (
             getCallParticipantMeta(session.callee.toString(), calleeType),
           ]);
 
+          const isCallerListener = callerType === "ServiceProvider";
+          const listenerDisplayName = isCallerListener
+            ? (callerMeta.callerAlias || callerMeta.callerName)
+            : (calleeMeta.callerAlias || calleeMeta.callerName);
+          const listenerDisplayAlias = isCallerListener
+            ? (callerMeta.callerAlias || callerMeta.callerName)
+            : (calleeMeta.callerAlias || calleeMeta.callerName);
+
           // Notify callee if online
           if (callee) {
             io.to(callee.socketId).emit("incoming_call", {
@@ -310,8 +318,8 @@ export const configureSocket = async (
               calleeName: calleeMeta.callerName,
               callee_name: calleeMeta.callerName,
               calleeAlias: calleeMeta.callerAlias || calleeMeta.callerName,
-              listenerName: calleeMeta.callerName,
-              listenerAlias: calleeMeta.callerAlias || calleeMeta.callerName,
+              listenerName: listenerDisplayName,
+              listenerAlias: listenerDisplayAlias,
               calleeImageUrl: calleeMeta.callerImageUrl,
             });
           } else {
@@ -368,16 +376,23 @@ export const configureSocket = async (
 
         let listenerDisplayName = "";
         let listenerAlias = "";
-        if (currentSession.calleeModel === "ServiceProvider") {
+        const providerId =
+          currentSession.calleeModel === "ServiceProvider"
+            ? currentSession.callee
+            : currentSession.callerModel === "ServiceProvider"
+            ? currentSession.caller
+            : null;
+
+        if (providerId) {
           try {
-            const prov = await Provider.findById(currentSession.callee).select("name alias");
+            const prov = await Provider.findById(providerId).select("name alias");
             if (prov) {
               listenerAlias = prov.alias ? prov.alias.trim() : "";
               const name = prov.name ? prov.name.trim() : "";
               listenerDisplayName = listenerAlias || name || "";
             }
-          } catch (calleeLookupErr) {
-            console.warn("accept_call: failed to lookup callee provider", calleeLookupErr);
+          } catch (lookupErr) {
+            console.warn("accept_call: failed to lookup provider", lookupErr);
           }
         }
 

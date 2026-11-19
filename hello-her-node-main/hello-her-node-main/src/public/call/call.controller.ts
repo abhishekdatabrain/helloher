@@ -158,11 +158,13 @@ export class CallController {
       // 🆕 Determine if this is a new user (only for User -> ServiceProvider calls)
       let isNewUser = false;
       let callerName = callerId;
+      let callerAlias = "";
       let callerImageUrl: string | null = null;
 
       try {
         const callerMeta = await getCallParticipantMeta(callerId, callerType);
         callerName = callerMeta.callerName;
+        callerAlias = callerMeta.callerAlias || callerMeta.callerName;
         callerImageUrl = callerMeta.callerImageUrl;
       } catch (err) {
         console.warn("⚠️ Error resolving caller meta:", err);
@@ -203,6 +205,15 @@ export class CallController {
           console.warn("⚠️ Error resolving callee user meta:", calleeErr);
         }
       }
+
+      // Dynamically resolve Listener name & alias depending on who is ServiceProvider
+      const isCallerListener = callerType === "ServiceProvider";
+      const listenerDisplayName = isCallerListener
+        ? (callerAlias || callerName)
+        : (calleeAlias || calleeName);
+      const listenerDisplayAlias = isCallerListener
+        ? (callerAlias || callerName)
+        : (calleeAlias || calleeName);
 
       if (callerType === "User" && calleeType === "ServiceProvider") {
         try {
@@ -245,8 +256,8 @@ export class CallController {
           calleeName,
           callee_name: calleeName,
           calleeAlias: calleeAlias || calleeName,
-          listenerName: calleeName,
-          listenerAlias: calleeAlias || calleeName,
+          listenerName: listenerDisplayName,
+          listenerAlias: listenerDisplayAlias,
           calleeImageUrl,
           perMinutePricePaise: result.session.perMinutePricePaise,
           isNewUser,
@@ -293,8 +304,8 @@ export class CallController {
             calleeName,
             callee_name: calleeName,
             calleeAlias: calleeAlias || calleeName,
-            listenerName: calleeName,
-            listenerAlias: calleeAlias || calleeName,
+            listenerName: listenerDisplayName,
+            listenerAlias: listenerDisplayAlias,
             calleeImageUrl,
             isNewUser,
           },
@@ -326,8 +337,8 @@ export class CallController {
       sessionObj.calleeName = calleeName;
       sessionObj.callee_name = calleeName;
       sessionObj.calleeAlias = calleeAlias || calleeName;
-      sessionObj.listenerName = calleeName;
-      sessionObj.listenerAlias = calleeAlias || calleeName;
+      sessionObj.listenerName = listenerDisplayName;
+      sessionObj.listenerAlias = listenerDisplayAlias;
       sessionObj.calleeImageUrl = calleeImageUrl;
       sessionObj.callee_image_url = calleeImageUrl;
       if (calleeProvider) {
@@ -634,28 +645,94 @@ export class CallController {
             perMinutePricePaise: 1,
             createdAt: 1,
             updatedAt: 1,
-            receiverName: resolveDisplayNameExpr("calleeInfo"),
+            receiverName: {
+              $cond: [
+                { $eq: ["$caller", userId] },
+                resolveDisplayNameExpr("calleeInfo"),
+                resolveDisplayNameExpr("callerInfo"),
+              ],
+            },
             receiver: {
-              _id: "$calleeInfo._id",
-              name: resolveDisplayNameExpr("calleeInfo"),
-              phoneNumber: "$calleeInfo.phoneNumber",
+              _id: {
+                $cond: [
+                  { $eq: ["$caller", userId] },
+                  "$calleeInfo._id",
+                  "$callerInfo._id",
+                ],
+              },
+              name: {
+                $cond: [
+                  { $eq: ["$caller", userId] },
+                  resolveDisplayNameExpr("calleeInfo"),
+                  resolveDisplayNameExpr("callerInfo"),
+                ],
+              },
+              phoneNumber: {
+                $cond: [
+                  { $eq: ["$caller", userId] },
+                  "$calleeInfo.phoneNumber",
+                  "$callerInfo.phoneNumber",
+                ],
+              },
               activeImageURL: {
                 $cond: [
-                  { $eq: ["$calleeInfo.activeImageType", "avatar"] },
-                  { $ifNull: ["$calleeInfo.avatar", "$calleeInfo.profilePicture"] },
-                  { $ifNull: ["$calleeInfo.profilePicture", "$calleeInfo.avatar"] },
+                  { $eq: ["$caller", userId] },
+                  {
+                    $cond: [
+                      { $eq: ["$calleeInfo.activeImageType", "avatar"] },
+                      { $ifNull: ["$calleeInfo.avatar", "$calleeInfo.profilePicture"] },
+                      { $ifNull: ["$calleeInfo.profilePicture", "$calleeInfo.avatar"] },
+                    ],
+                  },
+                  {
+                    $cond: [
+                      { $eq: ["$callerInfo.activeImageType", "avatar"] },
+                      { $ifNull: ["$callerInfo.avatar", "$callerInfo.profilePicture"] },
+                      { $ifNull: ["$callerInfo.profilePicture", "$callerInfo.avatar"] },
+                    ],
+                  },
                 ],
               },
             },
             receiverInfo: {
-              _id: "$calleeInfo._id",
-              name: resolveDisplayNameExpr("calleeInfo"),
-              phoneNumber: "$calleeInfo.phoneNumber",
+              _id: {
+                $cond: [
+                  { $eq: ["$caller", userId] },
+                  "$calleeInfo._id",
+                  "$callerInfo._id",
+                ],
+              },
+              name: {
+                $cond: [
+                  { $eq: ["$caller", userId] },
+                  resolveDisplayNameExpr("calleeInfo"),
+                  resolveDisplayNameExpr("callerInfo"),
+                ],
+              },
+              phoneNumber: {
+                $cond: [
+                  { $eq: ["$caller", userId] },
+                  "$calleeInfo.phoneNumber",
+                  "$callerInfo.phoneNumber",
+                ],
+              },
               activeImageURL: {
                 $cond: [
-                  { $eq: ["$calleeInfo.activeImageType", "avatar"] },
-                  { $ifNull: ["$calleeInfo.avatar", "$calleeInfo.profilePicture"] },
-                  { $ifNull: ["$calleeInfo.profilePicture", "$calleeInfo.avatar"] },
+                  { $eq: ["$caller", userId] },
+                  {
+                    $cond: [
+                      { $eq: ["$calleeInfo.activeImageType", "avatar"] },
+                      { $ifNull: ["$calleeInfo.avatar", "$calleeInfo.profilePicture"] },
+                      { $ifNull: ["$calleeInfo.profilePicture", "$calleeInfo.avatar"] },
+                    ],
+                  },
+                  {
+                    $cond: [
+                      { $eq: ["$callerInfo.activeImageType", "avatar"] },
+                      { $ifNull: ["$callerInfo.avatar", "$callerInfo.profilePicture"] },
+                      { $ifNull: ["$callerInfo.profilePicture", "$callerInfo.avatar"] },
+                    ],
+                  },
                 ],
               },
             },
@@ -791,28 +868,94 @@ export class CallController {
             totalSeconds: 1,
             perMinutePricePaise: 1,
             createdAt: 1,
-            receiverName: resolveDisplayNameExpr("calleeInfo"),
+            receiverName: {
+              $cond: [
+                { $eq: ["$caller", targetId] },
+                resolveDisplayNameExpr("calleeInfo"),
+                resolveDisplayNameExpr("callerInfo"),
+              ],
+            },
             receiver: {
-              _id: "$calleeInfo._id",
-              name: resolveDisplayNameExpr("calleeInfo"),
-              phoneNumber: "$calleeInfo.phoneNumber",
+              _id: {
+                $cond: [
+                  { $eq: ["$caller", targetId] },
+                  "$calleeInfo._id",
+                  "$callerInfo._id",
+                ],
+              },
+              name: {
+                $cond: [
+                  { $eq: ["$caller", targetId] },
+                  resolveDisplayNameExpr("calleeInfo"),
+                  resolveDisplayNameExpr("callerInfo"),
+                ],
+              },
+              phoneNumber: {
+                $cond: [
+                  { $eq: ["$caller", targetId] },
+                  "$calleeInfo.phoneNumber",
+                  "$callerInfo.phoneNumber",
+                ],
+              },
               activeImageURL: {
                 $cond: [
-                  { $eq: ["$calleeInfo.activeImageType", "avatar"] },
-                  { $ifNull: ["$calleeInfo.avatar", "$calleeInfo.profilePicture"] },
-                  { $ifNull: ["$calleeInfo.profilePicture", "$calleeInfo.avatar"] },
+                  { $eq: ["$caller", targetId] },
+                  {
+                    $cond: [
+                      { $eq: ["$calleeInfo.activeImageType", "avatar"] },
+                      { $ifNull: ["$calleeInfo.avatar", "$calleeInfo.profilePicture"] },
+                      { $ifNull: ["$calleeInfo.profilePicture", "$calleeInfo.avatar"] },
+                    ],
+                  },
+                  {
+                    $cond: [
+                      { $eq: ["$callerInfo.activeImageType", "avatar"] },
+                      { $ifNull: ["$callerInfo.avatar", "$callerInfo.profilePicture"] },
+                      { $ifNull: ["$callerInfo.profilePicture", "$callerInfo.avatar"] },
+                    ],
+                  },
                 ],
               },
             },
             receiverInfo: {
-              _id: "$calleeInfo._id",
-              name: resolveDisplayNameExpr("calleeInfo"),
-              phoneNumber: "$calleeInfo.phoneNumber",
+              _id: {
+                $cond: [
+                  { $eq: ["$caller", targetId] },
+                  "$calleeInfo._id",
+                  "$callerInfo._id",
+                ],
+              },
+              name: {
+                $cond: [
+                  { $eq: ["$caller", targetId] },
+                  resolveDisplayNameExpr("calleeInfo"),
+                  resolveDisplayNameExpr("callerInfo"),
+                ],
+              },
+              phoneNumber: {
+                $cond: [
+                  { $eq: ["$caller", targetId] },
+                  "$calleeInfo.phoneNumber",
+                  "$callerInfo.phoneNumber",
+                ],
+              },
               activeImageURL: {
                 $cond: [
-                  { $eq: ["$calleeInfo.activeImageType", "avatar"] },
-                  { $ifNull: ["$calleeInfo.avatar", "$calleeInfo.profilePicture"] },
-                  { $ifNull: ["$calleeInfo.profilePicture", "$calleeInfo.avatar"] },
+                  { $eq: ["$caller", targetId] },
+                  {
+                    $cond: [
+                      { $eq: ["$calleeInfo.activeImageType", "avatar"] },
+                      { $ifNull: ["$calleeInfo.avatar", "$calleeInfo.profilePicture"] },
+                      { $ifNull: ["$calleeInfo.profilePicture", "$calleeInfo.avatar"] },
+                    ],
+                  },
+                  {
+                    $cond: [
+                      { $eq: ["$callerInfo.activeImageType", "avatar"] },
+                      { $ifNull: ["$callerInfo.avatar", "$callerInfo.profilePicture"] },
+                      { $ifNull: ["$callerInfo.profilePicture", "$callerInfo.avatar"] },
+                    ],
+                  },
                 ],
               },
             },
