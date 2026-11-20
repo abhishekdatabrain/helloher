@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Us – HelloHer</title>
+    <link rel="icon" href="./public/favicon.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .hero-bg {
+            background: radial-gradient(circle at top right, #e0eaff 0%, #ffffff 40%),
+                radial-gradient(circle at bottom left, #f0f4ff 0%, #ffffff 50%);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(46, 125, 252, 0.05);
+            filter: blur(80px);
+            border-radius: 50%;
+            top: -50px;
+            left: -50px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        #nav-wrapper {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-gray-800">
+
+    <div id="nav-wrapper" class="fixed top-0 left-0 right-0 z-50 w-full pt-4">
+        <div class="max-w-[90%] mx-auto">
+            <nav id="nav-element" class="rounded-lg px-4 sm:px-6 py-3 flex items-center justify-between flex-wrap"
+                style="border: 0.3px solid #2E7DFC; background: linear-gradient(90deg, #2E7DFC 0%, rgba(155, 193, 254, 0.6) 13.94%, #EDF4FF 26.44%);">
+
+
+                <div class="flex items-center space-x-3">
+                    <img src="./public/logo.png" alt="logo" class="h-8 sm:h-14" />
+                </div>
+
+                <div class="md:hidden">
+                    <button id="menu-btn" class="text-gray-700 focus:outline-none">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <ul id="menu"
+                    class="hidden md:flex items-center text-base lg:text-lg justify-between w-full md:w-[45%] font-semibold text-gray-700 mt-4 md:mt-0 space-y-3 md:space-y-0 md:space-x-4 lg:space-x-6">
+                    <li><a href="/" class="hover:text-[#134CA8] transition-colors">Home</a></li>
+                    <li><a href="about.html" class="text-[#134CA8]">About Us</a></li>
+                    <li><a href="join_a_listener.html" class="hover:text-[#134CA8] transition-colors">Join as a
+                            Listener</a></li>
+                    <li><a href="contact.html" class="hover:text-[#134CA8] transition-colors">Contact Us</a></li>
+                </ul>
+
+                <div class="hidden md:flex">
+                    <a href="#"
+                        class="bg-[#2E7DFC] text-white px-4 py-3 rounded-xl flex items-center space-x-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" class="lucide lucide-smartphone">
+                            <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+                            <path d="M12 18h.01" />
+                        </svg>
+                        <span>Download App</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <section class="hero-bg pt-32 pb-24 md:pt-48 md:pb-32 px-4">
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <div
+                class="inline-flex items-center space-x-2 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full mb-6">
+                <span class="flex h-2 w-2 rounded-full bg-blue-600"></span>
+                <span class="text-xs font-bold text-blue-700 uppercase tracking-widest">Our Story</span>
+            </div>
+
+            <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
+                Empowering Voices through <br />
+                <span class="text-[#2E7DFC]">Human Connection.</span>
+            </h1>
+
+            <p class="text-lg md:text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto mb-10">
+                HelloHer is more than an app; it’s a sanctuary. We bridge the gap between
+                digital isolation and the profound need to be heard by someone who cares.
+            </p>
+
+            <div class="flex justify-center gap-6 text-sm font-medium text-slate-400">
+                <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    Empathy Driven
+                </span>
+                <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    Women Led
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <main class="max-w-4xl mx-auto px-6 -mt-16 relative z-20 pb-20">
+        <div class="glass-card shadow-xl shadow-blue-100/50 rounded-[2.5rem] p-8 md:p-16">
+
+            <div class="space-y-16">
+                <div class="relative">
+                    <div class="flex items-start gap-6">
+                        <div
+                            class="hidden sm:flex flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-[#2E7DFC] to-blue-400 text-white items-center justify-center font-bold text-xl shadow-lg shadow-blue-200">
+                            01
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800 mb-4">Our Mission</h2>
+                            <p class="text-gray-600 leading-relaxed text-lg">
+                                We believe that "Connection is the heart of healing." In an increasingly fast-paced
+                                world, people often feel overlooked. HelloHer was created to provide a safe,
+                                judgment-free space where anyone can speak their truth.
+                                <span
+                                    class="block mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 text-blue-900 rounded-r-lg italic">
+                                    "Our goal is to ensure that no one has to carry their emotional burden alone, even
+                                    for a single night."
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <div class="flex items-start gap-6">
+                        <div
+                            class="hidden sm:flex flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-[#2E7DFC] to-blue-400 text-white items-center justify-center font-bold text-xl shadow-lg shadow-blue-200">
+                            02
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800 mb-4">The Power of Listening</h2>
+                            <p class="text-gray-600 leading-relaxed text-lg">
+                                Unlike traditional social media, HelloHer focuses on the "Talking Cure." By matching
+                                users with verified female listeners, we facilitate authentic conversations that reduce
+                                stress and improve mental clarity through simple, kind interaction.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <div class="flex items-start gap-6">
+                        <div
+                            class="hidden sm:flex flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-[#2E7DFC] to-blue-400 text-white items-center justify-center font-bold text-xl shadow-lg shadow-blue-200">
+                            03
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800 mb-4">Verified & Safe</h2>
+                            <p class="text-gray-600 leading-relaxed text-lg">
+                                Safety is our foundation. Every listener on our platform undergoes a rigorous identity
+                                verification and screening process. We combine technology with human vetting to maintain
+                                a high standard of empathy and professionalism.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-20 pt-10 border-t border-gray-100 text-center">
+                <p class="text-slate-800 font-bold mb-4 text-lg">Want to be a part of our journey?</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="join_a_listener.html"
+                        class="inline-block bg-[#2E7DFC] text-white px-8 py-3 rounded-full hover:bg-blue-600 transition-colors shadow-lg">
+                        Become a Listener
+                    </a>
+                    <a href="contact.html"
+                        class="inline-block border border-slate-200 text-slate-600 px-8 py-3 rounded-full hover:bg-slate-50 transition-colors">
+                        Contact Team
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white pt-6 pb-8 border-t border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-8 text-center md:text-left">
+
+                    <div class="md:col-span-5 flex flex-col items-center md:items-start ">
+                        <div class="mb-6">
+                            <img src="./public/footerLogo.svg" alt="HelloHer Logo" class="h-16 w-auto">
+                        </div>
+                        <p class="text-slate-600 text-base leading-relaxed max-w-sm mb-8">
+                            Hello Her is a safe and supportive space where you can talk openly with kind, verified
+                            female
+                            listeners. We’re here to help you feel heard, understood, and less alone.
+                        </p>
+
+                        <div class="w-full">
+                            <h4 class="text-slate-900 font-bold text-sm mb-4">Follow us:</h4>
+                            <div class="flex justify-center md:justify-start gap-4">
+                                <a href="#" class="text-blue-600 hover:opacity-80 transition-opacity">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                    </svg>
+                                </a>
+                                <a href="join_a_listener.html"
+                                    class="text-blue-600 hover:opacity-80 transition-opacity">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <h4 class="text-blue-600 font-bold text-lg mb-6 uppercase tracking-wider">Company</h4>
+                        <ul class="space-y-4">
+                            <li><a href="about.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">About
+                                    Us</a></li>
+                            <li><a href="join_a_listener.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Join as
+                                    a Listener</a></li>
+                            <li><a href="contact.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Contact
+                                    Us</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="md:col-span-4 ">
+                        <h4 class="text-blue-600 font-bold text-lg mb-6 uppercase tracking-wider">Platform</h4>
+                        <ul class="space-y-4">
+                            <li><a href="#" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">For
+                                    Listener</a></li>
+                            <li><a href="#" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">For
+                                    Users (Talk & Share)</a></li>
+                            <li><a href="policy.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Privacy
+                                    Policy</a></li>
+                            <li><a href="terms.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Terms &
+                                    Conditions</a></li>
+                            <li><a href="refund.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Refund &
+                                    Cancellation Policy</a></li>
+                            <li><a href="grievance.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Grievance
+                                    Redressal Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 text-center">
+                    <p class="text-slate-500 text-sm sm:text-base">
+                        &copy; 2026 Hello Her. All Rights Reserved.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const btn = document.getElementById('menu-btn');
+        const menu = document.getElementById('menu');
+        btn.addEventListener('click', () => menu.classList.toggle('hidden'));
+    </script>
+</body>
+
+</html>

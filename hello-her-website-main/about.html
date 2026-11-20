@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HelloHer – Someone to Talk To</title>
+    <link rel="icon" href="./public/favicon.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* body {
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        } */
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .prose-content p {
+            margin-bottom: 1.5rem;
+            color: #4b5563;
+            line-height: 1.75;
+        }
+
+        .prose-content h2 {
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-gray-800">
+
+    <!-- Navbar + Hero -->
+    <div class="pt-0.5"
+        style="background: linear-gradient(90deg, #D6E6FF 10%, #FFFFFF 35%, #FFFFFF 75%, #D6E6FF 100%);">
+
+        <!-- Navbar -->
+        <div class="max-w-[90%] mx-auto">
+
+            <nav class="rounded-lg mx-2 sm:mx-4 mt-2 px-4 sm:px-6 py-3 flex items-center justify-between flex-wrap"
+                style="border: 0.3px solid #2E7DFC; background: linear-gradient(90deg, #2E7DFC 0%, rgba(155, 193, 254, 0.6) 13.94%, #EDF4FF 26.44%);">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <img src="./public/logo.png" alt="logo" class="h-8 sm:h-14" />
+                </div>
+
+                <!-- Hamburger Menu (Mobile) -->
+                <div class="md:hidden">
+                    <button id="menu-btn" class="text-gray-700 focus:outline-none">
+                        <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Menu -->
+                <ul id="menu"
+                    class="hidden md:flex items-center text-base lg:text-lg justify-between w-full md:w-[45%] font-semibold text-gray-700 mt-4 md:mt-0 space-y-3 md:space-y-0 md:space-x-4 lg:space-x-6">
+                    <li><a href="/" class="hover:text-[#134CA8] block md:inline">Home</a></li>
+                    <li><a href="about.html" class="text-[#134CA8] block md:inline">About Us</a></li>
+                    <li><a href="join_a_listener.html" class="hover:text-[#134CA8] block md:inline">Join as a
+                            Listener</a></li>
+                    <li><a href="contact.html" class="hover:text-[#134CA8] block md:inline">Contact Us</a></li>
+                    <li class="md:hidden">
+                        <a href="#"
+                            class="bg-[#2E7DFC] text-white px-4 py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700 w-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-smartphone-icon lucide-smartphone">
+                                <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+                                <path d="M12 18h.01" />
+                            </svg>
+                            <span>Download the App</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Download Button -->
+                <div class="hidden md:flex mt-4 md:mt-0">
+                    <a href="#"
+                        class="bg-[#2E7DFC] text-white px-3 lg:px-4 py-3 lg:py-4 rounded-lg flex items-center space-x-2 hover:bg-blue-700 text-sm lg:text-base">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-smartphone-icon lucide-smartphone lg:w-6 lg:h-6">
+                            <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+                            <path d="M12 18h.01" />
+                        </svg>
+                        <span>Download the App</span>
+                    </a>
+                </div>
+
+            </nav>
+        </div>
+
+        <!-- hero section -->
+        <section class="relative py-20  px-6 overflow-hidden min-h-[90vh] flex items-center justify-center"
+            style="background: linear-gradient(90deg, #D6E6FF 10%, #FFFFFF 35%, #FFFFFF 75%, #D6E6FF 100%);">
+
+            <div class="max-w-4xl mx-auto text-center relative z-10">
+                <p class="text-blue-600 font-bold text-sm tracking-widest uppercase mb-2">Our Story</p>
+
+                <h3 class="text-4xl md:text-7xl font-semibold text-slate-900 leading-[1.1] mb-8 tracking-tight">
+                    Connection is <br /> <span class="font-bold">the heart of healing.</span>
+                </h3>
+
+                <p class="max-w-6xl mx-auto text-gray-600 text-base md:text-xl leading-relaxed font-medium opacity-90">
+                    Hello Her was created to help people who feel lonely, unheard, or emotionally overwhelmed by giving
+                    them
+                    access to kind, human conversations.
+                </p>
+            </div>
+
+            <div
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-400/10 blur-[120px] rounded-full -z-0">
+            </div>
+        </section>
+    </div>
+
+    <!-- Why hello her exist -->
+    <section class="max-w-7xl min-h-screen mx-auto px-4 sm:px-6 flex flex-col justify-center py-8 sm:py-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+
+            <!-- Hero Visual (LEFT) -->
+            <div class="relative flex justify-center md:justify-start order-1">
+                <img src="./public/join.png" alt="join_img"
+                    class="w-full max-w-xs sm:max-w-md md:max-w-full object-contain" />
+            </div>
+
+            <!-- Hero Text (RIGHT) -->
+            <div class="text-center md:text-left order-2">
+                <h1
+                    class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-snug md:leading-tight mb-4 sm:mb-6">
+                    Why Hello Her Exists
+                </h1>
+
+                <p class="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-lg mx-auto md:mx-0">
+                    In today’s always-connected world, many people still feel deeply alone. Hello Her was created for
+                    men and women who need someone to listen—without judgment, pressure, or expectations.
+                </p>
+
+                <p class="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-lg mx-auto md:mx-0">
+                    We believe that being truly heard can bring comfort, clarity, and emotional relief. Sometimes, a
+                    single honest conversation is enough to make things feel lighter.
+                </p>
+
+                <p class="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-lg mx-auto md:mx-0">
+                    Hello Her isn’t just a service — it’s a safe space where conversations are respected, feelings are
+                    valued, and no one has to face loneliness alone.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- Our Mission -->
+    <section class="h-[80vh] flex flex-col justify-center text-center px-4 sm:px-6"
+        style="background: radial-gradient(50% 50% at 50% 50%, #D6E6FF 0%, #F8FBFF 100%);">
+        <p class="text-blue-600 font-bold text-sm tracking-widest uppercase mb-2">Our Mission</p>
+        <h3 class="text-3xl leading-relaxed max-w-3xl  mx-auto font-semibold mb-3 sm:mb-4 px-4 text-gray-700">
+            To create a safe and supportive space where people can talk openly and feel emotionally supported through
+            genuine listening.
+        </h3>
+    </section>
+
+
+    <!-- Our Value -->
+    <section class="py-16 bg-white px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="mb-12">
+                <p class="text-blue-600 font-bold text-sm tracking-widest uppercase mb-2">Our Values</p>
+                <h2 class="text-4xl md:text-5xl font-semibold text-slate-900 tracking-tight">What We Stand For</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
+
+                <div
+                    class="lg:col-span-6 bg-[#F3F4F6] rounded-[2rem] p-8 md:p-10 flex flex-col items-start transition-transform hover:scale-[1.02] duration-300">
+                    <div class="mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-stone-700 fill-current"
+                            viewBox="0 0 24 24">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-stone-800 mb-4">Empathy over judgment</h3>
+                    <p class="text-stone-600 font-semibold leading-relaxed">We listen with understanding, not
+                        assumptions.
+                    </p>
+                </div>
+                <div
+                    class="lg:col-span-6 bg-[#EBF3FF] rounded-[2rem] p-8 md:p-10 flex flex-col items-start transition-transform hover:scale-[1.02] duration-300">
+                    <div class="mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-stone-700" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-stone-800 mb-4">Privacy over exposure</h3>
+                    <p class="text-stone-600 font-semibold leading-relaxed">Your identity and conversations stay
+                        private.</p>
+                </div>
+
+                <div
+                    class="lg:col-span-7 bg-[#EBF3FF] rounded-[2rem] p-8 md:p-10 flex flex-col items-start transition-transform hover:scale-[1.02] duration-300">
+                    <div class="mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-stone-700" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-stone-800 mb-4">Respect in every conversation</h3>
+                    <p class="text-stone-600 font-semibold leading-relaxed">Every interaction is built on mutual
+                        respect.</p>
+                </div>
+
+                <div
+                    class="lg:col-span-5 bg-[#F3F4F6] rounded-[2rem] p-8 md:p-10 flex flex-col items-start transition-transform hover:scale-[1.02] duration-300">
+                    <div class="mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-stone-700" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-stone-800 mb-4">Safety for all users</h3>
+                    <p class="text-stone-600 font-semibold leading-relaxed">A protected space for both users and
+                        listeners.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Belief -->
+    <section class="relative py-16 px-6 overflow-hidden bg-white">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+            <div class="space-y-6">
+                <p class="text-blue-600 font-bold text-sm tracking-widest uppercase mb-2">Our Belief</p>
+
+                <h3 class="text-4xl  font-semibold text-slate-900 leading-tight">
+                    We Believe Listening Can Heal
+                </h3>
+                <p class="text-slate-600 text-base md:text-lg leading-relaxed max-w-xl">
+                    We believe that being truly listened to can help people feel understood, supported, and less alone.
+                    A meaningful conversation has the power to turn isolation into connection. By creating a space built
+                    on empathy and trust, Hello Her helps people build emotional strength and feel supported in a
+                    fast-moving, disconnected world.
+                </p>
+            </div>
+
+            <div class="w-full h-full rounded-[4rem] md:rounded-[6rem] overflow-hidden">
+                <img src="./public/about.png" alt="Our Belief" class="w-full h-full object-contain" />
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Promise -->
+    <section class="py-16 bg-white text-center px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-5xl font-bold text-slate-900 mb-16">
+                Our Promise to you
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+
+                <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 bg-blue-50 rounded-xl flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-blue-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0110 0v4" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl md:text-2xl font-bold text-slate-900 mb-3">Total Anonymity</h3>
+                    <p class="text-slate-500 text-sm md:text-base leading-relaxed max-w-[280px]">
+                        Speak freely with zero digital footprint and end-to-end encryption.
+                    </p>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 bg-blue-50 rounded-xl flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-blue-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            <path d="M9 12l2 2 4-4" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl md:text-2xl font-bold text-slate-900 mb-3">Verified Listeners</h3>
+                    <p class="text-slate-500 text-sm md:text-base leading-relaxed max-w-[280px]">
+                        Every professional listener undergoes rigorous training and background checks.
+                    </p>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 bg-blue-50 rounded-xl flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-blue-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl md:text-2xl font-bold text-slate-900 mb-3">24/7 Presence</h3>
+                    <p class="text-slate-500 text-sm md:text-base leading-relaxed max-w-[280px]">
+                        A compassionate ear is always available, no matter the time zone or hour.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="flex justify-center">
+                <a href="#"
+                    class="bg-[#2E7DFC] text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">
+                    Begin Your Journey
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- SMARTPHONE -->
+    <section class="py-12 md:py-16 bg-white overflow-hidden">
+        <div class="max-w-3xl mx-auto px-4 text-center">
+
+            <div class="flex justify-center mb-8 md:mb-12">
+                <div class="relative inline-flex items-end justify-center">
+
+                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 
+                            w-[130%] h-[75%] md:h-[80%] 
+                            bg-[#0048BB] rounded-t-[2.5rem] md:rounded-t-[3.5rem] 
+                            z-0">
+                    </div>
+
+                    <img src="./public/works4.png" alt="Hello Her App Interface"
+                        class="relative z-10 w-32 sm:w-40 md:w-48 lg:w-52 drop-shadow-2xl" />
+                </div>
+            </div>
+
+            <div class="mb-10">
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-semibold text-slate-900 leading-tight mb-4">
+                    Download the <br class="hidden sm:block" />
+                    <span class="text-blue-600">Hello Her</span> App Now
+                </h2>
+                <div class="w-24 md:w-96 h-[2px] bg-[#2E7DFC] mx-auto rounded-full"></div>
+            </div>
+
+            <div class="flex  items-center justify-center gap-4 px-4 sm:px-0">
+
+                <a href="#"
+                    class="w-fit sm:w-auto flex items-center gap-3 px-6 py-2.5 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all shadow-sm group">
+                    <img src="./public/playstore.svg" alt="playstore" class="w-6 h-6 md:w-8 md:h-8" />
+                    <div class="text-left">
+                        <p class="text-[9px] md:text-[10px] uppercase text-gray-500 font-bold leading-none">Get it on
+                        </p>
+                        <p class="text-base md:text-lg font-bold text-slate-800">Google Play</p>
+                    </div>
+                </a>
+
+                <a href="#"
+                    class="w-fit sm:w-auto flex items-center gap-3 px-6 py-2.5 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all shadow-sm group">
+                    <img src="./public/apple.svg" alt="appstore" class="w-6 h-6 md:w-8 md:h-8" />
+                    <div class="text-left">
+                        <p class="text-[9px] md:text-[10px] uppercase text-gray-500 font-bold leading-none">Download on
+                            the</p>
+                        <p class="text-base md:text-lg font-bold text-slate-800">App Store</p>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-white pt-6 pb-8 border-t border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-8 text-center md:text-left">
+
+                    <div class="md:col-span-5 flex flex-col items-center md:items-start ">
+                        <div class="mb-6">
+                            <img src="./public/footerLogo2.svg" alt="HelloHer Logo" class="h-16 w-auto">
+                        </div>
+                        <p class="text-slate-600 text-base leading-relaxed max-w-sm mb-8">
+                            Hello Her is a safe and supportive space where you can talk openly with kind, verified
+                            female
+                            listeners. We’re here to help you feel heard, understood, and less alone.
+                        </p>
+
+                        <div class="w-full">
+                            <h4 class="text-slate-900 font-bold text-sm mb-4">Follow us:</h4>
+                            <div class="flex justify-center md:justify-start gap-4">
+                                <a href="#" class="text-blue-600 hover:opacity-80 transition-opacity">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                    </svg>
+                                </a>
+                                <a href="join_a_listener.html"
+                                    class="text-blue-600 hover:opacity-80 transition-opacity">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <h4 class="text-blue-600 font-bold text-lg mb-6 uppercase tracking-wider">Company</h4>
+                        <ul class="space-y-4">
+                            <li><a href="about.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">About
+                                    Us</a></li>
+                            <li><a href="join_a_listener.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Join as
+                                    a Listener</a></li>
+                            <li><a href="contact.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Contact
+                                    Us</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="md:col-span-4 ">
+                        <h4 class="text-blue-600 font-bold text-lg mb-6 uppercase tracking-wider">Platform</h4>
+                        <ul class="space-y-4">
+                            <li><a href="#" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">For
+                                    Listener</a></li>
+                            <li><a href="#" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">For
+                                    Users (Talk & Share)</a></li>
+                            <li><a href="policy.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Privacy
+                                    Policy</a></li>
+                            <li><a href="terms.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Terms &
+                                    Conditions</a></li>
+                            <li><a href="refund.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Refund &
+                                    Cancellation Policy</a></li>
+                            <li><a href="grievance.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Grievance
+                                    Redressal Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 text-center">
+                    <p class="text-slate-500 text-sm sm:text-base">
+                        &copy; 2026 Hello Her. All Rights Reserved.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+
+<script>
+    const btn = document.getElementById('menu-btn');
+    const menu = document.getElementById('menu');
+
+    btn.addEventListener('click', () => {
+        menu.classList.toggle('hidden');
+    });
+
+
+    const testimonialData = [
+        {
+            name: "Raghav",
+            text: "I was nervous at first, but the platform felt safe and respectful. The listener was kind and made me feel comfortable opening up.",
+            img: "https://randomuser.me/api/portraits/men/1.jpg"
+        },
+        {
+            name: "Zishan",
+            text: "Knowing that conversations are private helped me talk freely. It felt like a space where I could just be myself.",
+            img: "https://randomuser.me/api/portraits/men/2.jpg"
+        },
+        {
+            name: "Ravi",
+            text: "The verification process really shows they care about safety. Every interaction I've had has been respectful and calm.",
+            img: "https://randomuser.me/api/portraits/men/3.jpg"
+        },
+        {
+            name: "Aman",
+            text: "It's rare to find a place where people actually listen without judging. This app has been a blessing for my mental peace.",
+            img: "https://randomuser.me/api/portraits/men/4.jpg"
+        }
+    ];
+
+    let testIndex = 0;
+
+    function renderTestimonials() {
+        const track = document.getElementById('testimonial-track');
+        const dotsContainer = document.getElementById('testimonial-dots');
+
+        track.innerHTML = testimonialData.map(t => `
+        <div class="min-w-full md:min-w-[33.333%] px-4 box-border">
+            <div class="bg-white p-8  border border-gray-100 shadow-sm relative mt-6 h-full flex flex-col">
+                <div class="absolute -top-6 left-8 w-12 h-12 bg-[#93C5FD] rounded-full flex items-center justify-center text-white shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-quote-icon lucide-quote"><path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/><path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/></svg>                </div>
+                
+                <div class="flex gap-1 mb-4 pt-4">
+                    ${[1, 2, 3, 4, 5].map(() => `<svg class="w-5 h-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>`).join('')}
+                </div>
+
+                <p class="text-gray-600 leading-relaxed mb-8 flex-grow">"${t.text}"</p>
+
+                <div class="flex items-center gap-3 border-t pt-6">
+                    <img src="${t.img}" class="w-10 h-10 rounded-full object-cover grayscale" />
+                    <div class="text-left">
+                        <div class="font-bold text-slate-800 text-sm">${t.name}</div>
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider">Verified User</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+        // Create Dots
+        dotsContainer.innerHTML = testimonialData.map((_, i) => `
+        <button onclick="goToTestimonial(${i})" class="w-2.5 h-2.5 rounded-full transition-all duration-300 ${i === testIndex ? 'bg-blue-600 w-8' : 'bg-gray-200'}"></button>
+    `).join('');
+    }
+
+    function updateTestimonialPosition() {
+        const track = document.getElementById('testimonial-track');
+        const isMobile = window.innerWidth < 768;
+        const step = isMobile ? 100 : 33.333;
+        track.style.transform = `translateX(-${testIndex * step}%)`;
+
+        // Update dots
+        const dots = document.querySelectorAll('#testimonial-dots button');
+        dots.forEach((dot, i) => {
+            if (i === testIndex) {
+                dot.classList.replace('bg-gray-200', 'bg-blue-600');
+                dot.classList.replace('w-2.5', 'w-8');
+            } else {
+                dot.classList.replace('bg-blue-600', 'bg-gray-200');
+                dot.classList.replace('w-8', 'w-2.5');
+            }
+        });
+    }
+
+    function goToTestimonial(index) {
+        testIndex = index;
+        updateTestimonialPosition();
+    }
+
+    // Auto-move every 5 seconds
+    setInterval(() => {
+        testIndex = (testIndex + 1) % (window.innerWidth < 768 ? testimonialData.length : testimonialData.length - 2);
+        if (testIndex < 0) testIndex = 0;
+        updateTestimonialPosition();
+    }, 5000);
+
+    window.addEventListener('resize', updateTestimonialPosition);
+    renderTestimonials();
+
+</script>
+
+</html>

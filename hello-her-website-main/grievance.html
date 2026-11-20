@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grievance Redressal Policy – HelloHer</title>
+    <link rel="icon" href="./public/favicon.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Hero background now starts at the very top of the browser */
+        .hero-bg {
+            background: radial-gradient(circle at top right, #e0eaff 0%, #ffffff 40%),
+                        radial-gradient(circle at bottom left, #f0f4ff 0%, #ffffff 50%);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(46, 125, 252, 0.05);
+            filter: blur(80px);
+            border-radius: 50%;
+            top: -50px;
+            left: -50px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* Smooth transition for the floating effect */
+        #nav-wrapper {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-gray-800">
+
+    <div id="nav-wrapper" class="fixed top-0 left-0 right-0 z-50 w-full pt-4">
+        <div class="max-w-[90%] mx-auto">
+            <nav id="nav-element" class="rounded-lg px-4 sm:px-6 py-3 flex items-center justify-between flex-wrap" style="border: 0.3px solid #2E7DFC; background: linear-gradient(90deg, #2E7DFC 0%, rgba(155, 193, 254, 0.6) 13.94%, #EDF4FF 26.44%);">                
+                <div class="flex items-center space-x-3">
+                    <img src="./public/logo.png" alt="logo" class="h-8 sm:h-14" />
+                </div>
+
+                <div class="md:hidden">
+                    <button id="menu-btn" class="text-gray-700 focus:outline-none">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                </div>
+
+                <ul id="menu" class="hidden md:flex items-center text-base lg:text-lg justify-between w-full md:w-[45%] font-semibold text-gray-700 mt-4 md:mt-0 space-y-3 md:space-y-0 md:space-x-4 lg:space-x-6">
+                    <li><a href="/" class="hover:text-[#134CA8] transition-colors">Home</a></li>
+                    <li><a href="about.html" class="hover:text-[#134CA8] transition-colors">About Us</a></li>
+                    <li><a href="join_a_listener.html" class="hover:text-[#134CA8] transition-colors">Join as a Listener</a></li>
+                    <li><a href="contact.html" class="hover:text-[#134CA8] transition-colors">Contact Us</a></li>
+                </ul>
+
+                <div class="hidden md:flex">
+                    <a href="#" class="bg-[#2E7DFC] text-white px-4 py-3 rounded-xl flex items-center space-x-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="lucide lucide-smartphone"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+                        <span>Download App</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <section class="hero-bg pt-32 pb-24 md:pt-48 md:pb-32 px-4">
+    <div class="max-w-4xl mx-auto text-center relative z-10">
+        <div class="inline-flex items-center space-x-2 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full mb-6">
+            <span class="flex h-2 w-2 rounded-full bg-blue-600"></span>
+            <span class="text-xs font-bold text-blue-700 uppercase tracking-widest">User Protection</span>
+        </div>
+
+        <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
+            Safe Platform <br />
+            <span class="text-[#2E7DFC]">Fair Resolution.</span>
+        </h1>
+
+        <p class="text-lg md:text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto mb-10">
+            This policy explains how grievances are reported, reviewed, and resolved to maintain a safe and trusted environment on HelloHer.
+        </p>
+    </div>
+</section>
+
+<main class="max-w-4xl mx-auto px-6 -mt-16 relative z-20 pb-20">
+<div class="glass-card shadow-xl shadow-blue-100/50 rounded-[2.5rem] p-8 md:p-16">
+
+<article class="max-w-none text-slate-800">
+
+<header class="mb-8 text-center">
+    <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+        Grievance Redressal Policy
+    </h1>
+    <p class="mt-3 text-slate-600 max-w-2xl mx-auto">
+        This policy outlines the complaint handling framework, reporting process, and resolution timelines.
+    </p>
+    <div class="mt-4 inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
+        Last updated: Feb 2026
+    </div>
+</header>
+
+<section class="grid gap-6">
+
+<!-- Regulatory Framework and Purpose -->
+<div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+<h3 class="text-lg font-bold text-slate-900">1. Regulatory Framework and Purpose</h3>
+<ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+<li><b>Statutory Compliance:</b> This policy is established in accordance with Rule 3(2) of the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021.</li>
+<li><b>Consumer Protection:</b> A formal mechanism is provided for Users and Listeners to seek redressal for complaints related to platform usage, privacy, or content.</li>
+<li><b>Ethical Standards:</b> The Vyoraa Tech is committed to maintaining a safe environment and addresses all grievances with professional integrity and confidentiality.</li>
+</ul>
+</div>
+
+<!-- Scope of Reportable Grievances -->
+<div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+<h3 class="text-lg font-bold text-slate-900">2. Scope of Reportable Grievances</h3>
+<ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+<li><b>Safety Violations:</b> Reporting of harassment, abuse, or the use of prohibited language by any party during interactions.</li>
+<li><b>Privacy Concerns:</b> Complaints regarding unauthorized data access or violations of the data management protocols outlined in the Privacy Policy.</li>
+<li><b>Prohibited Content:</b> Reporting of obscene, pornographic, or otherwise illegal content transmitted through the application.</li>
+<li><b>Technical and Financial:</b> Grievances related to failed recharges, account security breaches, or unauthorized use of account credentials.</li>
+</ul>
+</div>
+
+<!-- Grievance Filing Procedure -->
+<div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+<h3 class="text-lg font-bold text-slate-900">3. Grievance Filing Procedure</h3>
+<ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+<li><b>Written Communication:</b> All grievances must be submitted in writing via the designated email address provided by the Vyoraa Tech.</li>
+<li><b>Detail Requirements:</b> The complaint must include the registered mobile number, a clear description of the incident, and any supporting evidence such as screenshots or timestamps.</li>
+<li><b>Identity Verification:</b> The Grievance Officer may request additional information to verify the identity of the complainant before proceeding with the investigation.</li>
+</ul>
+</div>
+
+<!-- Acknowledgment and Resolution Timelines -->
+<div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+<h3 class="text-lg font-bold text-slate-900">4. Acknowledgment and Resolution Timelines</h3>
+<ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+<li><b>Prompt Acknowledgment:</b> Every grievance is acknowledged within 24 hours of receipt of the formal complaint.</li>
+<li><b>Disposal Period:</b> The Vyoraa Tech aims to investigate and resolve all complaints within 15 days from the date of the initial acknowledgment.</li>
+<li><b>Status Updates:</b> Users may request updates regarding the status of their grievance through the same communication channel used for filing.</li>
+</ul>
+</div>
+
+<!-- Emergency Escalation for Sensitive Content -->
+<div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+<h3 class="text-lg font-bold text-slate-900">5. Emergency Escalation for Sensitive Content</h3>
+<ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+<li><b>Priority Handling:</b> Complaints involving non-consensual sexual content, nudity, or impersonation of a person are treated as high priority emergencies.</li>
+<li><b>Immediate Action:</b> The Company strives to review and take necessary action, including the removal of such content, within 24 hours of receiving a valid report.</li>
+</ul>
+</div>
+
+<!-- Designated Grievance Officer Details -->
+<div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+<h3 class="text-lg font-bold text-slate-900">6. Designated Grievance Officer Details</h3>
+<ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+<li><b>Role Designation:</b> The Grievance Officer is responsible for overseeing the redressal process and ensuring compliance with the Information Technology Act.</li>
+<li><b>Name:</b> Akash Tiwari</li>
+<li><b>Designation:</b> Grievance Officer</li>
+<li><b>Address:</b> Vyoraa Tech, House No. D-57, Bhawani Dham, Phase – 1, Ayodhya Bypass Road, Bhopal</li>
+<li><b>Email:</b> <a href="mailto:support@helloher.in" class="text-blue-600 hover:underline">support@helloher.in</a></li>
+</ul>
+</div>
+
+</section>
+</article>
+</div>
+</main>
+
+
+     <!-- FOOTER -->
+    <footer class="bg-white pt-6 pb-8 border-t border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-8 text-center md:text-left">
+
+                    <div class="md:col-span-5 flex flex-col items-center md:items-start ">
+                        <div class="mb-6">
+                            <img src="./public/footerLogo2.svg" alt="HelloHer Logo" class="h-16 w-auto">
+                        </div>
+                        <p class="text-slate-600 text-base leading-relaxed max-w-sm mb-8">
+                            Hello Her is a safe and supportive space where you can talk openly with kind, verified
+                            female
+                            listeners. We’re here to help you feel heard, understood, and less alone.
+                        </p>
+
+                        <div class="w-full">
+                            <h4 class="text-slate-900 font-bold text-sm mb-4">Follow us:</h4>
+                            <div class="flex justify-center md:justify-start gap-4">
+                                <a href="#" class="text-blue-600 hover:opacity-80 transition-opacity">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                    </svg>
+                                </a>
+                                <a href="join_a_listener.html"
+                                    class="text-blue-600 hover:opacity-80 transition-opacity">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <h4 class="text-blue-600 font-bold text-lg mb-6 uppercase tracking-wider">Company</h4>
+                        <ul class="space-y-4">
+                            <li><a href="about.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">About
+                                    Us</a></li>
+                            <li><a href="join_a_listener.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Join as
+                                    a Listener</a></li>
+                            <li><a href="contact.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Contact
+                                    Us</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="md:col-span-4 ">
+                        <h4 class="text-blue-600 font-bold text-lg mb-6 uppercase tracking-wider">Platform</h4>
+                        <ul class="space-y-4">
+                            <li><a href="#" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">For
+                                    Listener</a></li>
+                            <li><a href="#" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">For
+                                    Users (Talk & Share)</a></li>
+                            <li><a href="policy.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Privacy
+                                    Policy</a></li>
+                            <li><a href="terms.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Terms &
+                                    Conditions</a></li>
+                            <li><a href="refund.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Refund &
+                                    Cancellation Policy</a></li>
+                            <li><a href="grievance.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Grievance
+                                    Redressal Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 text-center">
+                    <p class="text-slate-500 text-sm sm:text-base">
+                        &copy; 2026 Hello Her. All Rights Reserved.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Menu Toggle
+        const btn = document.getElementById('menu-btn');
+        const menu = document.getElementById('menu');
+        btn.addEventListener('click', () => menu.classList.toggle('hidden'));
+
+        // // Scroll Logic for Floating Sticky Navbar
+        // const navWrapper = document.getElementById('nav-wrapper');
+        
+        // window.addEventListener('scroll', () => {
+        //     if (window.scrollY > 20) {
+        //         // When scrolling down: narrow the top gap to 4px
+        //         navWrapper.style.paddingTop = "4px";
+        //     } else {
+        //         // At the top: original 16px (pt-4)
+        //         navWrapper.style.paddingTop = "16px";
+        //     }
+        // });
+    </script>
+</body>
+</html>

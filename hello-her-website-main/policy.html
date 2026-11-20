@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy – HelloHer</title>
+    <link rel="icon" href="./public/favicon.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Hero background now starts at the very top of the browser */
+        .hero-bg {
+            background: radial-gradient(circle at top right, #e0eaff 0%, #ffffff 40%),
+                        radial-gradient(circle at bottom left, #f0f4ff 0%, #ffffff 50%);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(46, 125, 252, 0.05);
+            filter: blur(80px);
+            border-radius: 50%;
+            top: -50px;
+            left: -50px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* Smooth transition for the floating effect */
+        #nav-wrapper {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-gray-800">
+
+    <div id="nav-wrapper" class="fixed top-0 left-0 right-0 z-50 w-full pt-4">
+        <div class="max-w-[90%] mx-auto">
+            <nav id="nav-element" class="rounded-lg px-4 sm:px-6 py-3 flex items-center justify-between flex-wrap" style="border: 0.3px solid #2E7DFC; background: linear-gradient(90deg, #2E7DFC 0%, rgba(155, 193, 254, 0.6) 13.94%, #EDF4FF 26.44%);">                
+                <div class="flex items-center space-x-3">
+                    <img src="./public/logo.png" alt="logo" class="h-8 sm:h-14" />
+                </div>
+
+                <div class="md:hidden">
+                    <button id="menu-btn" class="text-gray-700 focus:outline-none">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                </div>
+
+                <ul id="menu" class="hidden md:flex items-center text-base lg:text-lg justify-between w-full md:w-[45%] font-semibold text-gray-700 mt-4 md:mt-0 space-y-3 md:space-y-0 md:space-x-4 lg:space-x-6">
+                    <li><a href="/" class="hover:text-[#134CA8] transition-colors">Home</a></li>
+                    <li><a href="about.html" class="hover:text-[#134CA8] transition-colors">About Us</a></li>
+                    <li><a href="join_a_listener.html" class="hover:text-[#134CA8] transition-colors">Join as a Listener</a></li>
+                    <li><a href="contact.html" class="hover:text-[#134CA8] transition-colors">Contact Us</a></li>
+                </ul>
+
+                <div class="hidden md:flex">
+                    <a href="#" class="bg-[#2E7DFC] text-white px-4 py-3 rounded-xl flex items-center space-x-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="lucide lucide-smartphone"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+                        <span>Download App</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <section class="hero-bg pt-32 pb-24 md:pt-48 md:pb-32 px-4">
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <div class="inline-flex items-center space-x-2 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full mb-6">
+                <span class="flex h-2 w-2 rounded-full bg-blue-600"></span>
+                <span class="text-xs font-bold text-blue-700 uppercase tracking-widest">Trust & Transparency</span>
+            </div>
+            
+            <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
+                Privacy is at the <br/>
+                <span class="text-[#2E7DFC]">Heart of HelloHer.</span>
+            </h1>
+            
+            <p class="text-lg md:text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto mb-10">
+                We’ve built a sanctuary where your identity stays yours. 
+                Read how we protect your conversations and keep your data secure.
+            </p>
+
+            <div class="flex justify-center gap-6 text-sm font-medium text-slate-400">
+                <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                    Encrypted Calls
+                </span>
+                <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                    No Data Selling
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <main class="max-w-4xl mx-auto px-6 -mt-16 relative z-20 pb-20">
+        <div class="glass-card shadow-xl shadow-blue-100/50 rounded-[2.5rem] p-8 md:p-16">
+
+            <article class="max-w-none text-slate-800">
+                <header class="mb-8 text-center">
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Privacy Policy</h1>
+                    <p class="mt-3 text-slate-600 max-w-2xl mx-auto">How we protect your privacy, what we collect, and how we use it — written clearly for our community.</p>
+                    <div class="mt-4 inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">Last updated: Feb 2026</div>
+                </header>
+
+                <section class="grid gap-6">
+                    <!-- Introduction -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-blue-600 lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            Introduction
+                        </h3>
+                        <p class="mt-3 text-slate-600 leading-relaxed">
+                            Data security and privacy are treated with critical importance. An obligation is maintained to ensure a no-leak and no-disclosure business model, as all private and sensitive data must receive proportioned protection. Within the Hello Her application, Users and Listeners are in control and may decide what information is shared and what is kept private.
+                        </p>
+                        <p class="mt-3 text-slate-600 leading-relaxed">
+                            Hello Her is an internet based mobile phone application owned by Vyoraa Tech. Throughout this document, Vyoraa Tech may be referred to as "Us", "We", or "Hello Her" as the context allows. The user shall be referred to as "You", "Your", or "User(s)". Individuals on the Hello Her application engaging in discussion with Users shall be referred to as "Listener(s)". Hello Her and the User may together be referred to as "Parties" or individually as "Party". The terms We, Hello Her, or Vyoraa Tech cover their respective current or former employees, officers, directors, agents, successors, assigns, parents, subsidiaries, divisions, or affiliated corporations. The right to privacy is of paramount importance to the Hello Her community.
+                        </p>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-blue-600 lucide-database-zap"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 15 21.84"/><path d="M21 5V8"/><path d="M21 12L18 17H22L19 22"/><path d="M3 12A9 3 0 0 0 14.59 14.87"/></svg>
+                            Data Management
+                        </h3>
+                        <ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+                            <li><b>Secure Storage:</b> Any data entered by the User is stored in a secured format to deter leakage or misuse.</li>
+                            <li><b>Minimum Retention:</b> Only the basic minimum information is retained, which may include but is not limited to name, age, and mobile number for the registration process.</li>
+                            <li><b>Personalization:</b> With explicit or implied permission, information and data provided may be used to provide a personalized online experience while using the application.</li>
+                            <li><b>Privacy of Interaction:</b> Information or data shared with Listeners is for "your eyes only".</li>
+                            <li><b>Redaction and Censorship:</b> Any information may, upon request or choosing, be redacted, obscured, or censored from everyone, including employees of the Company and external Listeners.</li>
+                            <li><b>Permission Based Communication:</b> Messages are not sent without permission, and promotional messages include an option to opt out at any time.</li>
+                            <li><b>Third Party Non-Disclosure:</b> Data is not shared with any third party whatsoever.</li>
+                            <li><b>Statutory Compliance:</b> No sensitive personal data is collected, stored, or used beyond required statutory guidelines. Users are actively informed to avoid sharing sensitive personal data with anyone connected to Hello Her.</li>
+                            <li><b>Experience Purpose:</b> The purpose of collecting basic information is to provide a secure experience and allow Listeners to engage coherently.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Sharing of Data with Third Parties -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-blue-600 lucide-share-2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+                            Sharing of Data with Third Parties
+                        </h3>
+                        <ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+                            <li><b>Non-Affiliate Restrictions:</b> Personal data is not rented, sold, or shared with anyone, including non-affiliates, except to provide services as agreed or specifically requested by the User.</li>
+                            <li><b>Confidentiality Agreements:</b> Redacted and censored information is provided to unspecified Listeners who engage under strict confidentiality agreements and non-disclosure contracts.</li>
+                            <li><b>Legal Obligations:</b> Under statutory law, the Company is legally bound to disclose information that any government organization, with proper instructions from a court of law, might inquire about for investigations regarding illegal activities, fraud, or threats to physical safety.</li>
+                            <li><b>Harm Prevention:</b> If it is reasonably believed that a User may cause harm to themselves or others based on shared information, the Company is at liberty to use all available information to take any action deemed fit.</li>
+                            <li><b>Intermediary Status:</b> As far as online involvement is concerned, Hello Her is an intermediary as defined under the Information Technology Act 2000 and the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules 2021. User generated content is not modified, edited, or manipulated.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Information Collected Indirectly -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v18"/></svg>
+                            Information Collected Indirectly
+                        </h3>
+                        <ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+                            <li><b>Service Support:</b> Information may be received or collected to operate, provide, improve, understand, support, and market services.</li>
+                            <li><b>Quality Enhancement:</b> The types of information collected depend on how services are used and help in improving service quality.</li>
+                            <li><b>AI and Moderation Training:</b> The right is reserved to utilize data from User access and use including but not limited to text chats and voice call metadata for the purpose of training, enhancing, and maintaining AI models and moderation systems.</li>
+                            <li><b>Confidential Processing:</b> All such data is processed under strict confidentiality and privacy protocols to ensure platform integrity and safety.</li>
+                            <li><b>Mutual Integrity:</b> Parties are bound to secure each other’s information in accordance with law and maintain privacy ethics, being individually liable for violations.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Sensitive Personal Information -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-blue-600 lucide-shield-alert"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                            Sensitive Personal Information
+                        </h3>
+                        <ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+                            <li><b>Medical Disclaimer:</b> Users and Listeners are urged not to share sensitive personal information or core medical issues as Hello Her is not a medical facilitator and is not certified to practice medicine or advise on medication.</li>
+                            <li><b>User Volition:</b> If such information is shared, it is done so at the User's own volition.</li>
+                            <li><b>Responsibility Waiver:</b> No responsibility is taken by Hello Her for any sensitive information which the User may have chosen to share on the App.</li>
+                            <li><b>Consensual Exchange:</b> No responsibility is taken by Hello Her for the consensual exchange of information between Users and Listeners or any consequences following such exchange.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Payments Data -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-blue-600 lucide-credit-card"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                            Payments Data
+                        </h3>
+                        <ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+                            <li><b>Transaction Information:</b> When the application is used to purchase offers, additional information is processed, including payment accounts, transaction information, and payment methods.</li>
+                            <li><b>Bank Verification:</b> The name of the bank is received to confirm the bank account for use during payments.</li>
+                            <li><b>No Retention of Sensitive Payment Data:</b> Sensitive payment data, including debit card numbers, expiry dates, PINs, OTPs, or UPI PINs, is not retained by Hello Her as per statutory guidelines.</li>
+                            <li><b>Encryption:</b> Access to encrypted PIN software provided by payment corporations is not available to the Company/Hello Her.</li>
+                            <li><b>Management of Data:</b> Payment information may be managed, changed, limited, or deleted through payment settings or by deleting the account.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Excluded Services -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-blue-600 lucide-ban"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+                            Excluded Services
+                        </h3>
+                        <ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+                            <li><b>No Emergency Access:</b> Services do not provide access to emergency service providers, including medical, police, fire departments, or hospitals.</li>
+                            <li><b>Direct Contact Advised:</b> Users are advised to contact relevant emergency services in their local administration directly.</li>
+                            <li><b>Non-Certified Guidance:</b> Services are limited to providing general non-certified advisory, discussions, and guidance only.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Disclaimer and Indemnification -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-blue-600 lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                            Disclaimer and Indemnification
+                        </h3>
+                        <ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+                            <li><b>As-Is Basis:</b> Services are used at the User's own risk and are provided on an "as is" basis without express or implied warranties.</li>
+                            <li><b>No Warranty of Accuracy:</b> It is not warranted that information provided is accurate, complete, or useful, or that services will be operational and error free.</li>
+                            <li><b>Third Party Release:</b> Users release and indemnify the Company/Hello Her and its affiliates from any claims or damages relating to disputes with third parties.</li>
+                            <li><b>Indemnification:</b> If a claim is brought against the Company/Hello Her relating to a breach of obligations by a User or Listener, the breaching party shall indemnify and hold Hello Her harmless from all liabilities, damages, and legal fees.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Dispute Resolution and Governing Law -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-blue-600 lucide-scale"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+                            Dispute Resolution and Governing Law
+                        </h3>
+                        <ul class="mt-3 list-disc text-slate-600 ml-5 space-y-2 leading-relaxed">
+                            <li><b>Governing Law:</b> The governing law shall exclusively be applicable Indian Law.</li>
+                            <li><b>Jurisdiction:</b> Any dispute arising out of or related to Vyoraa Tech shall be under the express jurisdiction of the courts at Bhopal, India.</li>
+                            <li><b>Arbitration:</b> All disputes shall first be referred to Arbitration under a sole arbitrator, appointed mutually or through an established chamber of commerce.</li>
+                            <li><b>Arbitration Fees:</b> The arbitrator’s fee shall follow the model fee under the Arbitration and Conciliation Act 1996, and the language used shall be English.</li>
+                            <li><b>Jurisdictional Bar:</b> Use of any services binds the User legally and expressly bars the jurisdiction of any other court or forum.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <footer class="mt-8 text-center text-sm text-slate-500">
+                    <p>Policy version 2.1 • Last Updated: Feb 2026</p>
+                </footer>
+            </article>
+
+        </div>
+    </main>
+
+     <!-- FOOTER -->
+    <footer class="bg-white pt-6 pb-8 border-t border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-8 text-center md:text-left">
+
+                    <div class="md:col-span-5 flex flex-col items-center md:items-start ">
+                        <div class="mb-6">
+                            <img src="./public/footerLogo2.svg" alt="HelloHer Logo" class="h-16 w-auto">
+                        </div>
+                        <p class="text-slate-600 text-base leading-relaxed max-w-sm mb-8">
+                            Hello Her is a safe and supportive space where you can talk openly with kind, verified
+                            female
+                            listeners. We’re here to help you feel heard, understood, and less alone.
+                        </p>
+
+                        <div class="w-full">
+                            <h4 class="text-slate-900 font-bold text-sm mb-4">Follow us:</h4>
+                            <div class="flex justify-center md:justify-start gap-4">
+                                <a href="#" class="text-blue-600 hover:opacity-80 transition-opacity">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                    </svg>
+                                </a>
+                            
+                                <a href="join_a_listener.html"
+                                    class="text-blue-600 hover:opacity-80 transition-opacity">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                                    </svg>
+                                </a>
+                            
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <h4 class="text-blue-600 font-bold text-lg mb-6 uppercase tracking-wider">Company</h4>
+                        <ul class="space-y-4">
+                            <li><a href="about.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">About
+                                    Us</a></li>
+                            <li><a href="join_a_listener.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Join as
+                                    a Listener</a></li>
+                            <li><a href="contact.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Contact
+                                    Us</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="md:col-span-4 ">
+                        <h4 class="text-blue-600 font-bold text-lg mb-6 uppercase tracking-wider">Platform</h4>
+                        <ul class="space-y-4">
+                            <li><a href="#" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">For
+                                    Listener</a></li>
+                            <li><a href="#" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">For
+                                    Users (Talk & Share)</a></li>
+                            <li><a href="policy.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Privacy
+                                    Policy</a></li>
+                            <li><a href="terms.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Terms &
+                                    Conditions</a></li>
+                            <li><a href="refund.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Refund &
+                                    Cancellation Policy</a></li>
+                            <li><a href="grievance.html"
+                                    class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Grievance
+                                    Redressal Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 text-center">
+                    <p class="text-slate-500 text-sm sm:text-base">
+                        &copy; 2026 Hello Her. All Rights Reserved.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Menu Toggle
+        const btn = document.getElementById('menu-btn');
+        const menu = document.getElementById('menu');
+        btn.addEventListener('click', () => menu.classList.toggle('hidden'));
+
+        // // Scroll Logic for Floating Sticky Navbar
+        // const navWrapper = document.getElementById('nav-wrapper');
+        
+        // window.addEventListener('scroll', () => {
+        //     if (window.scrollY > 20) {
+        //         // When scrolling down: narrow the top gap to 4px
+        //         navWrapper.style.paddingTop = "4px";
+        //     } else {
+        //         // At the top: original 16px (pt-4)
+        //         navWrapper.style.paddingTop = "16px";
+        //     }
+        // });
+    </script>
+</body>
+</html>
