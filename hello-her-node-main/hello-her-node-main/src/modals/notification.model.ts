@@ -40,6 +40,7 @@ const notificationSchema = new Schema<INotification>(
         "sos_request",
         "low_balance_call",
         "provider_online",
+        "kyc_status_updated",
       ],
     },
     title: {

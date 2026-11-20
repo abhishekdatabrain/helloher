@@ -1986,6 +1986,8 @@ export class ProviderController {
       }
 
       // ✅ Update KYC Status if provided (admin only)
+      let kycStatusUpdated = false;
+      let newKycStatus: string | null = null;
       if (req.body.kycStatus) {
         console.log("[DEBUG] updateProvider - kycStatus input:", req.body.kycStatus);
         if (userRole !== "admin") {
@@ -1996,7 +1998,14 @@ export class ProviderController {
           console.error("[ERROR] Invalid KYC Status:", req.body.kycStatus);
           throw new ApiError(400, `KYC Status must be one of: ${ALLOWED_KYC_STATUSES.join(", ")}`);
         }
-        updateData.kycStatus = req.body.kycStatus as "approve" | "reject" | "request_reverify" | "pending";
+        const kycStatusInput = req.body.kycStatus as "approve" | "reject" | "request_reverify" | "pending";
+        const isKycChanged = existingProvider.kycStatus !== kycStatusInput;
+        const isRemarkProvided = req.body.remark !== undefined && req.body.remark !== existingProvider.remark;
+        if (isKycChanged || isRemarkProvided) {
+          kycStatusUpdated = true;
+          newKycStatus = kycStatusInput;
+        }
+        updateData.kycStatus = kycStatusInput;
         console.log("[DEBUG] updateProvider - kycStatus set:", updateData.kycStatus);
       }
 
@@ -2322,6 +2331,53 @@ export class ProviderController {
           });
         } catch (notifError) {
           console.error("Error creating warning notification:", notifError);
+          // Don't fail the request if notification fails
+        }
+      }
+
+      // 🔔 Create notification for KYC status update
+      if (kycStatusUpdated && newKycStatus) {
+        try {
+          const { createAndEmitNotification } = await import("../../services/notificationHelper.service");
+          const io = req.app.get("socketio");
+          const getSocketUser = req.app.get("getSocketUser");
+
+          const kycTitles: Record<string, string> = {
+            approve: "KYC Approved",
+            reject: "KYC Application Rejected",
+            request_reverify: "KYC Re-verification Required",
+            pending: "KYC Under Review",
+          };
+
+          const remarkText = updateData.remark || req.body.remark || (existingProvider as any).remark;
+
+          const kycMessages: Record<string, string> = {
+            approve: "Congratulations! Your KYC verification has been approved. You are now verified and ready to take calls.",
+            reject: remarkText
+              ? `Your KYC application was not approved. Reason: ${remarkText}. Please contact support for assistance.`
+              : "Your KYC application was not approved. Please contact support for assistance.",
+            request_reverify: remarkText
+              ? `Your KYC requires re-verification. Note: ${remarkText}. Please update and re-submit your documents.`
+              : "Your KYC requires re-verification. Please review and re-submit your verification documents.",
+            pending: "Your KYC verification is currently under review by our admin team. You will be notified once reviewed.",
+          };
+
+          await createAndEmitNotification({
+            type: "kyc_status_updated",
+            title: kycTitles[newKycStatus] || "KYC Status Updated",
+            message: kycMessages[newKycStatus] || `Your KYC status has been updated to ${newKycStatus}.`,
+            recipientId: providerId,
+            recipientType: "provider",
+            metadata: {
+              kycStatus: newKycStatus,
+              remark: remarkText || null,
+            },
+            io,
+            getSocketUser,
+          });
+          console.log(`[DEBUG] updateProvider - sent KYC status notification (${newKycStatus}) to provider ${providerId}`);
+        } catch (notifError) {
+          console.error("Error creating KYC status notification:", notifError);
           // Don't fail the request if notification fails
         }
       }
